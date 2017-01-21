@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class DatabaseServerConnectionInfoTest {
 
     @Test
-    public void makeDbLinksHhouldReturnProperDbLink() {
-        String expected = "jdbc:mysql://localhost:3306/javabase?serverTimezone=Europe/Warsaw";
+    public void makeDbLinksShouldReturnProperDbLink() {
+        String expected = "jdbc:mysql://localhost:3306/javabase";
         DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo();
         connectionInfo.setHostname("localhost");
         connectionInfo.setPort("3306");
