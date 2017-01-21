@@ -6,6 +6,7 @@ public class Connection {
     private Socket socket;
     private Thread thread;
     private User user = null;
+    private InputHandler inputHandler;
 
     public Connection(Socket socket) {
         this.socket = socket;
