@@ -52,7 +52,7 @@ public class DatabaseServer {
         return statement;
     }
 
-    public int createTablesIfDoesNotExists() {
+    public void createTablesIfDoesNotExists() {
         try {
             String sql =
                     "CREATE TABLE IF NOT EXISTS user (" +
@@ -105,17 +105,30 @@ public class DatabaseServer {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-
-        return -1;
     }
 
     public void insert(Object object) {
         //todo: insert, rozpoznawanie tabeli to typie obiektu
+
+        Class<?> c = object.getClass();
+        String table = "";
+        if (c == User.class) {
+            table = "user";
+            return;
+        }
+        if (c == Issue.class) {
+            table = "issue";
+            return;
+        }
+        if (c == Project.class) {
+            table = "project";
+            return;
+        }
     }
 
     public void delete(Object object) {
         //todo: delete, rozpoznawanie tabeli to typie obiektu
+
     }
 
     public void update(Object object) {

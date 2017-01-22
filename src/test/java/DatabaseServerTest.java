@@ -42,6 +42,8 @@ public class DatabaseServerTest {
 
         //TODO: insert
 
+        db.insert(new Project());
+
         //TODO: select
 
         //TODO: drop
