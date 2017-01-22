@@ -53,28 +53,71 @@ public class DatabaseServer {
     }
 
     public int createTablesIfDoesNotExists() {
-        //TODO : Tabele Project, Issue, ProjectUsers, ProjectIssues
         try {
             String sql =
                     "CREATE TABLE IF NOT EXISTS user (" +
-                    "id       int(5)      NOT NULL AUTO_INCREMENT PRIMARY KEY,"  +
-                    "name     varchar(50) NOT NULL DEFAULT 'empty'," +
-                    "surname  varchar(50) NOT NULL DEFAULT 'empty'," +
-                    "jobTitle enum('PROGRAMMER','TESTER','ADMIN') NOT NULL DEFAULT 'PROGRAMMER')";
+                            "id       INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                            "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
+                            "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
+                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL DEFAULT 'PROGRAMISTA')";
 
-            return statement.executeUpdate(sql);
+            statement.executeUpdate(sql);
+
+            sql =
+                    "CREATE TABLE IF NOT EXISTS issue (" +
+                            "id          INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                            "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytułu'," +
+                            "description VARCHAR(150)                        NOT NULL DEFAULT 'Brak opisu'," +
+                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL DEFAULT 'ZWYKŁY')";
+
+            statement.executeUpdate(sql);
+
+            sql =
+                    "CREATE TABLE IF NOT EXISTS project (" +
+                            "id          INT(5)                           NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                            "title       VARCHAR(50)                      NOT NULL DEFAULT 'Brak tytułu'," +
+                            "description VARCHAR(150)                     NOT NULL DEFAULT 'Brak opisu')";
+                            //bez pól do błędów i użytkowników, potrzebne osobne tabele project_user, project_issue
+
+            statement.executeUpdate(sql);
+
+            sql =
+                    "CREATE TABLE IF NOT EXISTS project_issue(" +
+                            "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                            "id_project INT(5)                              NOT NULL," +
+                            "id_issue   INT(5)                              NOT NULL," +
+                            "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id)," +
+                            "CONSTRAINT issue_fk   FOREIGN KEY (id_issue)   REFERENCES issue(id))";
+
+            statement.executeUpdate(sql);
+
+
+            sql =
+                    "CREATE TABLE IF NOT EXISTS project_user(" +
+                            "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                            "id_project INT(5)                              NOT NULL," +
+                            "id_user    INT(5)                              NOT NULL," +
+                            "CONSTRAINT project_fk_2 FOREIGN KEY (id_project) REFERENCES project(id)," +
+                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id))";
+
+            statement.executeUpdate(sql);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+
         return -1;
     }
 
     public void insert(Object object) {
         //todo: insert, rozpoznawanie tabeli to typie obiektu
     }
+
     public void delete(Object object) {
         //todo: delete, rozpoznawanie tabeli to typie obiektu
     }
+
     public void update(Object object) {
         //todo: update, rozpoznawanie tabeli to typie obiektu
     }
