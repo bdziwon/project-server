@@ -90,15 +90,7 @@ public class DatabaseServer {
 
             statement.executeUpdate(sql);
 
-            sql =
-                    "CREATE TABLE IF NOT EXISTS issue (" +
-                            "id          INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytułu'," +
-                            "description VARCHAR(150)                        NOT NULL DEFAULT 'Brak opisu'," +
-                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL)";
-                            //W takim wierszu domyślnym jest pierwsza wartość enuma
 
-            statement.executeUpdate(sql);
 
             sql =
                     "CREATE TABLE IF NOT EXISTS project (" +
@@ -110,14 +102,15 @@ public class DatabaseServer {
             statement.executeUpdate(sql);
 
             sql =
-                    "CREATE TABLE IF NOT EXISTS project_issue(" +
-                            "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "id_project INT(5)                              NOT NULL," +
-                            "id_issue   INT(5)                              NOT NULL," +
-                            "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id)" +
-                            "ON DELETE CASCADE ," +
-                            "CONSTRAINT issue_fk   FOREIGN KEY (id_issue)   REFERENCES issue(id)" +
-                            "ON DELETE CASCADE )";
+                    "CREATE TABLE IF NOT EXISTS issue (" +
+                            "id          INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                            "id_project  INT(5)                              NOT NULL," +
+                            "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytułu'," +
+                            "description VARCHAR(150)                        NOT NULL DEFAULT 'Brak opisu'," +
+                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL, " +
+                            "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id) " +
+                            "ON DELETE CASCADE)";
+            //W takim wierszu domyślnym jest pierwsza wartość enuma
 
             statement.executeUpdate(sql);
 
@@ -128,7 +121,7 @@ public class DatabaseServer {
                             "id_user    INT(5)                              NOT NULL," +
                             "CONSTRAINT project_fk_2 FOREIGN KEY (id_project) REFERENCES project(id)" +
                             "ON DELETE CASCADE," +
-                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id)" +
+                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id) " +
                             "ON DELETE CASCADE)";
 
             statement.executeUpdate(sql);
@@ -244,10 +237,6 @@ public class DatabaseServer {
                     } else {
                         System.out.println("Issue nie istnieje");
                         issue = (Issue) db.insert(issue);
-                        sql =
-                                "INSERT INTO project_issue(id_project, id_issue) " +
-                                        "VALUES ("+project.getId()+","+issue.getId()+")";
-                        changes = changes + db.statement.executeUpdate(sql);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
