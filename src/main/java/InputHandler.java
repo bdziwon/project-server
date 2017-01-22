@@ -8,5 +8,6 @@ public class InputHandler {
     //TODO: dodawanie uzytkownika do projektu
     //TODO: dodawanie błędu do projektu
     //TODO: tworzenie nowego projektu
+    //TODO: String w żadnym obiekcie nie może zawierac apostrofu '
     //i tym podobne
 }
