@@ -11,7 +11,7 @@ public class DatabaseServerConnectionInfoTest {
 
     @Test
     public void makeDbLinksShouldReturnProperDbLink() {
-        String expected = "jdbc:mysql://localhost:3306/javabase";
+        String expected = "jdbc:mysql://localhost:3306/?serverTimezone=Europe/Warsaw";
         DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo();
         connectionInfo.setHostname("localhost");
         connectionInfo.setPort("3306");
