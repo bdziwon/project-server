@@ -13,7 +13,7 @@ public class DatabaseServerConnectionInfo {
         super();
     }
 
-    public DatabaseServerConnectionInfo(String hostname, String port, String database, String login, String password) {
+    public DatabaseServerConnectionInfo(String hostname, String port, String database, String username, String password) {
         this(hostname,port,database);
         this.username = username;
         this.password = password;
