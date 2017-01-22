@@ -9,6 +9,7 @@ public class DatabaseServer {
 
     private static DatabaseServer db = null;
     private Statement statement;
+    private DatabaseServerConnectionInfo connectionInfo = null;
 
     private DatabaseServer() {
     }
@@ -49,7 +50,32 @@ public class DatabaseServer {
             return null;
         }
         this.statement = connection.createStatement();
+        this.connectionInfo = connectionInfo;
         return statement;
+    }
+
+    public void createDatabaseIfDoesNotExists(String database) {
+        String sql =
+                "CREATE DATABASE `"+database+"` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+        try {
+            statement.executeUpdate(sql);
+        } catch (SQLException e) {
+            if (e.toString().contains("database exists")) {
+                System.out.println("Tworzenie bazy: Baza już istnieje");
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void chooseDatabase(String database) {
+        try {
+            Connection c = statement.getConnection();
+            c.setCatalog(database);
+            this.statement = c.createStatement();
+        } catch (SQLException e) {
+            System.out.println("Zmiana bazy nie powiodła się");
+        }
     }
 
     public void createTablesIfDoesNotExists() {
@@ -59,7 +85,8 @@ public class DatabaseServer {
                             "id       INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
                             "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
-                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL DEFAULT 'PROGRAMISTA')";
+                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL)";
+                            //W takim wierszu domyślnym jest pierwsza wartość enuma
 
             statement.executeUpdate(sql);
 
@@ -68,7 +95,8 @@ public class DatabaseServer {
                             "id          INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytułu'," +
                             "description VARCHAR(150)                        NOT NULL DEFAULT 'Brak opisu'," +
-                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL DEFAULT 'ZWYKŁY')";
+                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL)";
+                            //W takim wierszu domyślnym jest pierwsza wartość enuma
 
             statement.executeUpdate(sql);
 
@@ -110,20 +138,20 @@ public class DatabaseServer {
     public void insert(Object object) {
         //todo: insert, rozpoznawanie tabeli to typie obiektu
 
+        //Dla każdego obiektu zawsze stworzy poprawnego inserta
+        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
+        String sql = sqlInterface.makeInsertSql();
+        System.out.println(sql);
+        try {
+            statement.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         Class<?> c = object.getClass();
-        String table = "";
-        if (c == User.class) {
-            table = "user";
-            return;
-        }
-        if (c == Issue.class) {
-            table = "issue";
-            return;
-        }
-        if (c == Project.class) {
-            table = "project";
-            return;
-        }
+            if (c == Project.class) {
+                //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
+            }
     }
 
     public void delete(Object object) {
