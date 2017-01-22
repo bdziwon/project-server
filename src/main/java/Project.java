@@ -31,6 +31,14 @@ public class Project implements DatabaseSqlInterface {
         return id;
     }
 
+    public void addIssue(Issue issue) {
+        issues.add(issue);
+    }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
+
     @Override
     public String makeUpdateSql() {
         String sql =
