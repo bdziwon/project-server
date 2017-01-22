@@ -4,7 +4,7 @@
 public class Issue implements Cloneable, DatabaseSqlInterface {
 	
 	
-    private int id;
+    private int id  = -1;
     private String title        = "Brak tytułu";
     private String description  = "Brak opisu";
     private String priority     = "ZWYKŁY";
@@ -45,8 +45,9 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
 
     @Override
     public String makeDeleteSql() {
-        //TODO: delete
-        return null;
+        String sql =
+                "DELETE FROM issue WHERE id="+getId();
+        return sql;
     }
 
     @Override
@@ -56,5 +57,11 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
                         "VALUES ('"+getTitle()+"','"+getDescription()+"','"+getPriority()+"')";
 
         return sql;
+    }
+
+    @Override
+    public int setId(int id) {
+        this.id = id;
+        return this.id;
     }
 }

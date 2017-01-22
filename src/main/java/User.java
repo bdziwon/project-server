@@ -6,7 +6,7 @@ import java.util.StringJoiner;
 
 public class User implements DatabaseSqlInterface {
 	
-	private int id;
+	private int id = -1;
     private String name     = "pusto";
     private String surname  = "pusto";
     private String jobTitle = "PROGRAMISTA";
@@ -58,5 +58,11 @@ public class User implements DatabaseSqlInterface {
                         "VALUES ('"+getName()+"','"+getSurname()+"','"+getJobTitle()+"')";
 
         return sql;
+    }
+
+    @Override
+    public int setId(int id) {
+        this.id = id;
+        return this.id;
     }
 }

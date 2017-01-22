@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class Project implements DatabaseSqlInterface {
 
-	private int id;
+	private int id = -1;
     private String title            = "Brak tytułu";
     private String description      = "Brak opisu";
     private ArrayList<Issue> issues = new ArrayList<Issue>();
@@ -49,5 +49,11 @@ public class Project implements DatabaseSqlInterface {
                         "VALUES ('"+getTitle()+"','"+getDescription()+"')";
 
         return sql;
+    }
+
+    @Override
+    public int setId(int id) {
+        this.id = id;
+        return this.id;
     }
 }
