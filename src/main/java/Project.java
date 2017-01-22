@@ -62,4 +62,12 @@ public class Project implements DatabaseSqlInterface {
         this.id = id;
         return this.id;
     }
+
+    public ArrayList<Issue> getIssues() {
+        return issues;
+    }
+
+    public ArrayList<User> getUsers() {
+        return users;
+    }
 }
