@@ -136,9 +136,8 @@ public class DatabaseServer {
     }
 
     public void insert(Object object) {
-        //todo: insert, rozpoznawanie tabeli to typie obiektu
 
-        //Dla każdego obiektu zawsze stworzy poprawnego inserta
+        //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
         String sql = sqlInterface.makeInsertSql();
         System.out.println(sql);
@@ -155,12 +154,11 @@ public class DatabaseServer {
     }
 
     public void delete(Object object) {
-        //todo: delete, rozpoznawanie tabeli to typie obiektu
-
+        //todo: delete na wzór insert
     }
 
     public void update(Object object) {
-        //todo: update, rozpoznawanie tabeli to typie obiektu
+        //todo: update na wzór insert
     }
 
 
