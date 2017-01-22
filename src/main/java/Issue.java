@@ -5,6 +5,7 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
 	
 	
     private int id  = -1;
+    private int projectId = -1;
     private String title        = "Brak tytułu";
     private String description  = "Brak opisu";
     private String priority     = "ZWYKŁY";
@@ -59,8 +60,8 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
     @Override
     public String makeInsertSql() {
         String sql =
-                "INSERT INTO issue(title,description,priority) " +
-                        "VALUES ('"+getTitle()+"','"+getDescription()+"','"+getPriority()+"')";
+                "INSERT INTO issue(id_project,title,description,priority) " +
+                        "VALUES ('"+getProjectId()+"','"+getTitle()+"','"+getDescription()+"','"+getPriority()+"')";
 
         return sql;
     }
@@ -69,5 +70,13 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
     public int setId(int id) {
         this.id = id;
         return this.id;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
     }
 }
