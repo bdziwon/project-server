@@ -63,9 +63,14 @@ public class DatabaseServerTest {
         project.addUser(user2);
 
         project = (Project) db.insert(project);
+
+        //!! ISSUE musi mieć ustawione id projektu przed dodaniem lub wywołaniem bo inaczej będzie wyjątek sqla
+        issue.setProjectId(project.getId());
+        issue2.setProjectId(project.getId());
+
         {
             int changes = db.update(project);
-            assertThat(changes).isEqualTo(5);
+            assertThat(changes).isEqualTo(3);
         }
         issue.setTitle("Błąd 3");
         user.setName("Bożena");
