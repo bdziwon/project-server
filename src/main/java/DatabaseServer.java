@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Created by Bartłomiej Dziwoń on 21.01.2017.
@@ -160,7 +161,19 @@ public class DatabaseServer {
 
         Class<?> c = object.getClass();
             if (c == Project.class) {
+
                 //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
+                Project project = (Project) object;
+
+                ArrayList<Issue> issue = project.getIssues();
+                ArrayList<User>  users = project.getUsers();
+
+                if (issue.size() > 0) {
+                    //todo: Wstawianie Issue, aktualizowanie istniejących w tabeli issue oraz dodawanie nowych, to samo w tabeli łączącej
+                }
+                if (users.size() > 0) {
+                    //todo: Wstawianie User, aktualizowanie istniejących w tabeli user oraz dodawanie nowych, to samo w tabeli łączącej
+                }
             }
         return object;
     }
