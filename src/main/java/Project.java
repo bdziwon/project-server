@@ -39,8 +39,9 @@ public class Project implements DatabaseSqlInterface {
 
     @Override
     public String makeDeleteSql() {
-        //todo: delete
-        return null;
+        String sql =
+                "DELETE FROM project WHERE id="+getId();
+        return sql;
     }
 
     public String makeInsertSql() {

@@ -47,8 +47,9 @@ public class User implements DatabaseSqlInterface {
 
     @Override
     public String makeDeleteSql() {
-        //todo: delete
-        return null;
+        String sql =
+                "DELETE FROM user WHERE id="+getId();
+        return sql;
     }
 
     @Override
