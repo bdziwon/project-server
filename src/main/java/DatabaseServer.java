@@ -166,7 +166,7 @@ public class DatabaseServer {
     }
 
     public int delete(Object object) {
-        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
+        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeDeleteSql();
         System.out.println(sql);
         try {
@@ -179,8 +179,18 @@ public class DatabaseServer {
         return 0;
     }
 
-    public void update(Object object) {
-        //todo: update na wzór insert
+    public int update(Object object) {
+        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
+        String sql = sqlInterface.makeUpdateSql();
+        System.out.println(sql);
+        try {
+            int changes = statement.executeUpdate(sql);
+            System.out.println("Zaktualizowane pozycje: "+changes);
+            return changes;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 
