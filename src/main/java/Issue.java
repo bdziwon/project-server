@@ -5,9 +5,9 @@ public class Issue implements Cloneable {
 	
 	
     private int id;
-    private String title = null;
-    private String description = null;
-    private String priority = null;    
+    private String title;
+    private String description;
+    private String priority;    
     
     public String getTitle(){
     return this.title;

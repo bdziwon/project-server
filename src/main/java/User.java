@@ -7,9 +7,9 @@ import java.util.ArrayList;
 public class User {
 	
 	private int id;
-    private String name = null;
-    private String surname = null;
-    private String jobTitle = null;    
+    private String name;
+    private String surname;
+    private String jobTitle;   
 
     public int getId(){
     return this.id;

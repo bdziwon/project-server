@@ -6,8 +6,8 @@ import java.util.ArrayList;
 public class Project {
 
 	private int id;
-    private String title = null;
-    private String description = null;
+    private String title;
+    private String description;
     private ArrayList<Issue> issues;
     private ArrayList<User> users;
     
