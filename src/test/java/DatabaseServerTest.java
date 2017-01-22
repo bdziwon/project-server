@@ -37,12 +37,24 @@ public class DatabaseServerTest {
             e.printStackTrace();
         }
 
+        //create database
+        db.createDatabaseIfDoesNotExists("database");
+
+        //choose database
+        db.chooseDatabase("database");
+
         //create tables
         db.createTablesIfDoesNotExists();
 
         //TODO: insert
+        User user = new User();
 
+        user.setName("Bartek");
+        user.setSurname("Dz");
+        user.setJobTitle("PROGRAMISTA");
+        db.insert(user);
         db.insert(new Project());
+        db.insert(new Issue());
 
         //TODO: select
 
