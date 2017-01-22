@@ -7,24 +7,24 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server {
-    private final  Log LOG = LogFactory.getLog(Server.class);
-    private  ArrayList<Connection> connections;
-    private  ServerSocket serverSocket;
-    private  int port;
+    private final Log LOG = LogFactory.getLog(Server.class);
+    private ArrayList<Connection> connections;
+    private ServerSocket serverSocket;
+    private int port;
 
-    private  final int DEFAULT_PORT = 4000;
+    private final int DEFAULT_PORT = 4000;
 
     // Wątek przyjmujący połączenia oraz tworzący wątki obsługi
-    private  Thread mainThread;
+    private Thread mainThread;
 
     // Jeśli true, mainThread będzie kontynuował przyjmowanie połączeń
-    private  boolean running;
+    private boolean running;
 
     public Server() {
         super();
     }
 
-    public  void run(int p) {
+    public void run(int p) {
         System.out.println("Starting up the server..");
 
         //inicjacja pól
@@ -41,7 +41,7 @@ public class Server {
         mainThread.start();
     }
 
-    private  void stopServer() {
+    private void stopServer() {
         disconnectClients();
         try {
             serverSocket.close();
@@ -52,11 +52,11 @@ public class Server {
         }
     }
 
-    private  void disconnectClients() {
+    private void disconnectClients() {
         //TODO: DISCONNECT ALL CLIENTS
     }
 
-    public  void main(String[] args) {
+    public void main(String[] args) {
 
         //Obsługa portu przez parametr
         port = getPort(args);
@@ -65,33 +65,32 @@ public class Server {
 
     }
 
-    public  int getPort(String[] args) {
+    public int getPort(String[] args) {
         if (args.length == 0) {
             return DEFAULT_PORT;
         } else {
             try {
                 int tmp = Integer.parseInt(args[0]);
                 return tmp;
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Error: Parameter has to be number, switching to default port.");
                 return DEFAULT_PORT;
             }
         }
     }
 
-    private  ServerSocket createServerSocket(int port) {
+    private ServerSocket createServerSocket(int port) {
         try {
             return new ServerSocket(port);
         } catch (IOException e) {
-            LOG.fatal("Error while creating server socket at port: "+port);
+            LOG.fatal("Error while creating server socket at port: " + port);
             e.printStackTrace();
             System.exit(-1);
         }
         return null;
     }
 
-    private  Thread createMainThread() {
+    private Thread createMainThread() {
         return new Thread(new Runnable() {
             public void run() {
                 while (running) {
@@ -101,8 +100,7 @@ public class Server {
                     //przyjmowanie połączenia
                     try {
                         clientSocket = serverSocket.accept();
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         if (serverSocket.isClosed()) {
                             System.out.println("Server socket has been closed, finishing mainThread.");
                             running = false;
@@ -128,23 +126,23 @@ public class Server {
         });
     }
 
-    public  ServerSocket getServerSocket() {
+    public ServerSocket getServerSocket() {
         return serverSocket;
     }
 
-    public  Thread getMainThread() {
+    public Thread getMainThread() {
         return mainThread;
     }
 
-    public  boolean isRunning() {
+    public boolean isRunning() {
         return running;
     }
 
-    public  void setRunning(boolean running) {
+    public void setRunning(boolean running) {
         this.running = running;
     }
 
-    public  int getDefaultPort() {
+    public int getDefaultPort() {
         return DEFAULT_PORT;
     }
 }
