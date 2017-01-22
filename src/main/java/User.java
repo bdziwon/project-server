@@ -1,24 +1,20 @@
-import java.util.ArrayList;
+import java.util.StringJoiner;
 
 /**
  * Created by Bartłomiej Dziwoń on 21.01.2017.
  */
 
-public class User {
+public class User implements DatabaseSqlInterface {
 	
 	private int id;
-    private String name = null;
-    private String surname = null;
-    private String jobTitle = null;    
+    private String name     = "pusto";
+    private String surname  = "pusto";
+    private String jobTitle = "PROGRAMISTA";
 
     public int getId(){
     return this.id;
     }
 
-    public void setId(int id){
-    this.id=id;
-    }
-    
     public String getName(){
     return this.name;
     }
@@ -41,5 +37,26 @@ public class User {
 
     public void setJobTitle(String jobTitle){
     this.jobTitle=jobTitle;
-    } 
+    }
+
+    @Override
+    public String makeUpdateSql() {
+        //todo: update
+        return null;
+    }
+
+    @Override
+    public String makeDeleteSql() {
+        //todo: delete
+        return null;
+    }
+
+    @Override
+    public String makeInsertSql() {
+        String sql =
+                "INSERT INTO user(name,surname,jobTitle) " +
+                        "VALUES ('"+getName()+"','"+getSurname()+"','"+getJobTitle()+"')";
+
+        return sql;
+    }
 }
