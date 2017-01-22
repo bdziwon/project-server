@@ -221,15 +221,62 @@ public class DatabaseServer {
             //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
             Project project = (Project) object;
 
-            ArrayList<Issue> issue = project.getIssues();
+            ArrayList<Issue> issues = project.getIssues();
             ArrayList<User>  users = project.getUsers();
+            ResultSet results;
 
-            if (issue.size() > 0) {
-                //todo: Wstawianie Issue, aktualizowanie istniejących w tabeli issue oraz dodawanie nowych, to samo w tabeli łączącej
+            //sprawdź czy issue istnieje
+            //jeśli nie, stwórz issue i stwórz project_issue
+            //jeśli tak, tylko update issue
+
+            for (Issue issue : issues
+                 ) {
+                sql =
+                        "SELECT * FROM issue WHERE id = "+issue.getId();
+
+                try {
+                    results = db.statement.executeQuery(sql);
+                    results.last();
+                    if (results.getRow() > 0) {
+                        System.out.println("Issue istnieje");
+                        changes = changes + db.update(issue);
+
+                    } else {
+                        System.out.println("Issue nie istnieje");
+                        issue = (Issue) db.insert(issue);
+                        sql =
+                                "INSERT INTO project_issue(id_project, id_issue) " +
+                                        "VALUES ("+project.getId()+","+issue.getId()+")";
+                        changes = changes + db.statement.executeUpdate(sql);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-            if (users.size() > 0) {
-                //todo: Wstawianie User, aktualizowanie istniejących w tabeli user oraz dodawanie nowych, to samo w tabeli łączącej
-            }
+
+            for (User user : users
+                    ) {
+                sql =
+                        "SELECT * FROM user WHERE id = "+user.getId();
+
+                try {
+                    results = db.statement.executeQuery(sql);
+                    results.last();
+                    if (results.getRow() > 0) {
+                        changes = changes + db.update(user);
+
+                    } else {
+                        user = (User) db.insert(user);
+                        sql =
+                                "INSERT INTO project_user(id_project, id_user) " +
+                                        "VALUES ("+project.getId()+","+user.getId()+")";
+                        changes = changes + db.statement.executeUpdate(sql);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }            
+            
         }
         return changes;
     }
