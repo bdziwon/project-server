@@ -65,11 +65,11 @@ public class DatabaseServerConnectionInfo {
         this.database = database;
     }
 
-    public String makeDbLink() throws IllegalArgumentException {
-        if (getHostname() == null || getPort() == null || getDatabase() == null) {
-            throw new IllegalArgumentException("Illegal hostname / port / database -> cannot be null");
+      public String makeDbLink() throws IllegalArgumentException {
+        if (getHostname() == null || getPort() == null) {
+            throw new IllegalArgumentException("Illegal hostname / port  -> cannot be null");
         }
-        String link = "jdbc:mysql://"+getHostname()+":"+getPort()+"/"+getDatabase()+"?serverTimezone=Europe/Warsaw";
+        String link = "jdbc:mysql://"+getHostname()+":"+getPort()+"/?serverTimezone=Europe/Warsaw";
         return link;
     }
 
