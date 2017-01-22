@@ -135,14 +135,22 @@ public class DatabaseServer {
         }
     }
 
-    public void insert(Object object) {
+    public Object insert(Object object) {
 
         //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
         String sql = sqlInterface.makeInsertSql();
         System.out.println(sql);
         try {
-            statement.executeUpdate(sql);
+            int changes = statement.executeUpdate(sql,Statement.RETURN_GENERATED_KEYS);
+            if (changes == 0) {
+                System.out.println("Błąd insert, brak zmian w tabeli");
+            } else {
+                ResultSet keys = statement.getGeneratedKeys();
+                if (keys.next()) {
+                    sqlInterface.setId(keys.getInt(1));
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -151,9 +159,12 @@ public class DatabaseServer {
             if (c == Project.class) {
                 //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
             }
+        return object;
     }
 
     public void delete(Object object) {
+        //DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
+        //String sql = sqlInterface.makeDeleteSql();
         //todo: delete na wzór insert
     }
 
