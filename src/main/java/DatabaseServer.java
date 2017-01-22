@@ -1,4 +1,3 @@
-import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.*;
 
@@ -114,8 +113,10 @@ public class DatabaseServer {
                             "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "id_project INT(5)                              NOT NULL," +
                             "id_issue   INT(5)                              NOT NULL," +
-                            "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id)," +
-                            "CONSTRAINT issue_fk   FOREIGN KEY (id_issue)   REFERENCES issue(id))";
+                            "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id)" +
+                            "ON DELETE CASCADE ," +
+                            "CONSTRAINT issue_fk   FOREIGN KEY (id_issue)   REFERENCES issue(id)" +
+                            "ON DELETE CASCADE )";
 
             statement.executeUpdate(sql);
 
@@ -125,8 +126,10 @@ public class DatabaseServer {
                             "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "id_project INT(5)                              NOT NULL," +
                             "id_user    INT(5)                              NOT NULL," +
-                            "CONSTRAINT project_fk_2 FOREIGN KEY (id_project) REFERENCES project(id)," +
-                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id))";
+                            "CONSTRAINT project_fk_2 FOREIGN KEY (id_project) REFERENCES project(id)" +
+                            "ON DELETE CASCADE," +
+                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id)" +
+                            "ON DELETE CASCADE)";
 
             statement.executeUpdate(sql);
 
@@ -162,10 +165,18 @@ public class DatabaseServer {
         return object;
     }
 
-    public void delete(Object object) {
-        //DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
-        //String sql = sqlInterface.makeDeleteSql();
-        //todo: delete na wzór insert
+    public int delete(Object object) {
+        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
+        String sql = sqlInterface.makeDeleteSql();
+        System.out.println(sql);
+        try {
+            int changes = statement.executeUpdate(sql);
+            System.out.println("Usuniętych pozycji: "+changes);
+            return changes;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public void update(Object object) {
