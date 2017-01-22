@@ -24,7 +24,7 @@ public class DatabaseServerTest {
 
         //connect
         DatabaseServerConnectionInfo connectionInfo =
-                new DatabaseServerConnectionInfo("localhost","3306", "database");
+                new DatabaseServerConnectionInfo("localhost","5555", "database");
         connectionInfo.setUsername("root");
         connectionInfo.setPassword("");
 
