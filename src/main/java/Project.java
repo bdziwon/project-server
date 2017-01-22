@@ -33,8 +33,13 @@ public class Project implements DatabaseSqlInterface {
 
     @Override
     public String makeUpdateSql() {
-        //todo: update
-        return null;
+        String sql =
+                "UPDATE project " +
+                        "SET " +
+                        "title = '"+getTitle()+"', " +
+                        "description = '"+getDescription()+"' " +
+                        "WHERE id = "+getId();
+        return sql;
     }
 
     @Override

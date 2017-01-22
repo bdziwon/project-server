@@ -41,8 +41,14 @@ public class User implements DatabaseSqlInterface {
 
     @Override
     public String makeUpdateSql() {
-        //todo: update
-        return null;
+        String sql =
+                "UPDATE user " +
+                        "SET " +
+                        "name = '"+getName()+"', " +
+                        "surname = '"+getSurname()+"', " +
+                        "jobTitle = '"+getJobTitle()+"' " +
+                        "WHERE id = "+getId();
+        return sql;
     }
 
     @Override

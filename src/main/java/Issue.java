@@ -39,8 +39,14 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
 
     @Override
     public String makeUpdateSql() {
-        //TODO: update
-        return null;
+        String sql =
+                "UPDATE issue " +
+                        "SET " +
+                        "title = '"+getTitle()+"', " +
+                        "description = '"+getDescription()+"', " +
+                        "priority = '"+getPriority()+"' "+
+                        "WHERE id = "+getId();
+        return sql;
     }
 
     @Override
