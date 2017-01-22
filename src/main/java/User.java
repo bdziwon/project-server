@@ -35,11 +35,11 @@ public class User {
     this.surname=surname;
     }
     
-    public String getJobtitle(){
+    public String getJobTitle(){
     return this.jobTitle;
     }
 
-    public void setJobtitle(String jobTitle){
+    public void setJobTitle(String jobTitle){
     this.jobTitle=jobTitle;
     } 
 }
