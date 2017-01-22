@@ -121,7 +121,6 @@ public class DatabaseServer {
 
             statement.executeUpdate(sql);
 
-
             sql =
                     "CREATE TABLE IF NOT EXISTS project_user(" +
                             "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
@@ -139,8 +138,19 @@ public class DatabaseServer {
         }
     }
 
-    public Object insert(Object object) {
+    /**
+     * Wstawia obiekt do odpowiedniej tabeli
+     * UWAGA: INSERT nie wrzuca błędów i użytkowników, to robi UPDATE.
+     * Insert wrzuca projekt z ustawionymi własnymi parametrami
+     * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
+     * @return Obiekt z wypełnionym polem ID odpowiadającym polu w bazie
+     */
+    public Object insert(Object object) throws IllegalArgumentException {
 
+        Class<?> c = object.getClass();
+        if (Issue.class != c && Project.class != c && User.class != c) {
+            throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
+        }
         //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
         String sql = sqlInterface.makeInsertSql();
@@ -158,27 +168,21 @@ public class DatabaseServer {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        Class<?> c = object.getClass();
-            if (c == Project.class) {
-
-                //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
-                Project project = (Project) object;
-
-                ArrayList<Issue> issue = project.getIssues();
-                ArrayList<User>  users = project.getUsers();
-
-                if (issue.size() > 0) {
-                    //todo: Wstawianie Issue, aktualizowanie istniejących w tabeli issue oraz dodawanie nowych, to samo w tabeli łączącej
-                }
-                if (users.size() > 0) {
-                    //todo: Wstawianie User, aktualizowanie istniejących w tabeli user oraz dodawanie nowych, to samo w tabeli łączącej
-                }
-            }
         return object;
     }
 
-    public int delete(Object object) {
+    /**
+     * Usuwa obiekt z tabeli sprawdzając id
+     * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}  <br>
+     *               ID obiektu musi być większe od -1
+     * @return int z liczbą usuniętych wierszy
+     * @throws IllegalArgumentException
+     */
+    public int delete(Object object) throws IllegalArgumentException {
+        Class<?> c = object.getClass();
+        if (Issue.class != c && Project.class != c && User.class != c) {
+            throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
+        }
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeDeleteSql();
         System.out.println(sql);
@@ -192,18 +196,42 @@ public class DatabaseServer {
         return 0;
     }
 
+    /**
+     * Aktualizuje odpowiednik obiektu w tabeli
+     * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
+     * @return Liczba zaktualizowanych wierszy
+     */
     public int update(Object object) {
+        Class<?> c = object.getClass();
+        if (Issue.class != c && Project.class != c && User.class != c) {
+            throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
+        }
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeUpdateSql();
         System.out.println(sql);
+        int changes = 0;
         try {
-            int changes = statement.executeUpdate(sql);
+            changes = statement.executeUpdate(sql);
             System.out.println("Zaktualizowane pozycje: "+changes);
-            return changes;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 0;
+        if (c == Project.class) {
+
+            //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
+            Project project = (Project) object;
+
+            ArrayList<Issue> issue = project.getIssues();
+            ArrayList<User>  users = project.getUsers();
+
+            if (issue.size() > 0) {
+                //todo: Wstawianie Issue, aktualizowanie istniejących w tabeli issue oraz dodawanie nowych, to samo w tabeli łączącej
+            }
+            if (users.size() > 0) {
+                //todo: Wstawianie User, aktualizowanie istniejących w tabeli user oraz dodawanie nowych, to samo w tabeli łączącej
+            }
+        }
+        return changes;
     }
 
 
