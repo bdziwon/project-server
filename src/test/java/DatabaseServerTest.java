@@ -1,7 +1,4 @@
-import com.mysql.cj.api.jdbc.JdbcConnection;
 import org.junit.Test;
-
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -27,6 +24,7 @@ public class DatabaseServerTest {
                 new DatabaseServerConnectionInfo("localhost","5555", "database");
         connectionInfo.setUsername("root");
         connectionInfo.setPassword("");
+        connectionInfo.setDatabase("database");
 
         DatabaseServer db = DatabaseServer.getInstance();
         try {
@@ -38,7 +36,7 @@ public class DatabaseServerTest {
         }
 
         //create database
-        db.createDatabaseIfDoesNotExists("database");
+        db.createDatabaseIfDoesNotExists(   "database");
 
         //choose database
         db.chooseDatabase("database");
