@@ -48,16 +48,21 @@ public class DatabaseServerTest {
 
         //TODO: insert
         User user = new User();
-
         user.setName("Bartek");
         user.setSurname("Dz");
         user.setJobTitle("PROGRAMISTA");
-        db.insert(user);
-        db.insert(new Project());
-        db.insert(new Issue());
 
-        //TODO: select
+        int id = user.getId();
+        user = (User) db.insert(user);
+        int newId = user.getId();
+        assertThat(id).isNotEqualTo(newId);
+        assertThat(newId).isGreaterThan(0);
 
-        //TODO: drop
+        //TODO: update
+
+        //TODO: delete
+        int changes = db.delete(user);
+        assertThat(changes).isGreaterThan(0);
+
     }
 }
