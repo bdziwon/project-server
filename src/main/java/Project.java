@@ -1,3 +1,5 @@
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -77,6 +79,20 @@ public class Project implements DatabaseSqlInterface {
     public int setId(int id) {
         this.id = id;
         return this.id;
+    }
+
+    @Override
+    public Project resultSetToObject(ResultSet resultSet) {
+        Project project = null;
+        try {
+            project = new Project();
+            project.setId(resultSet.getInt(1));
+            project.setTitle(resultSet.getString(2));
+            project.setDescription(resultSet.getString(3));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return project;
     }
 
     public ArrayList<Issue> getIssues() {
