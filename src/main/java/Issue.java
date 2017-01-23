@@ -1,3 +1,6 @@
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * Created by Bartłomiej Dziwoń on 21.01.2017.
  */
@@ -77,6 +80,23 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
     public int setId(int id) {
         this.id = id;
         return this.id;
+    }
+    
+    @Override
+    public Issue resultSetToObject(ResultSet resultSet) {
+        Issue issue = null;
+        try {
+            issue = new Issue();
+            issue.setId(resultSet.getInt(1));
+            issue.setProjectId(resultSet.getInt(2));
+            issue.setTitle(resultSet.getString(3));
+            issue.setDescription(resultSet.getString(4));
+            issue.setPriority(resultSet.getString(5));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return issue;
     }
 
     public int getProjectId() {
