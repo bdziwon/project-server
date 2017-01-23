@@ -68,6 +68,13 @@ public class User implements DatabaseSqlInterface {
     }
 
     @Override
+    public String makeSelectSql() {
+        String sql =
+                "SELECT * FROM user WHERE id = "+getId();
+        return sql;
+    }
+
+    @Override
     public int setId(int id) {
         this.id = id;
         return this.id;

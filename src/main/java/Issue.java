@@ -67,6 +67,13 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
     }
 
     @Override
+    public String makeSelectSql() {
+        String sql =
+                "SELECT * FROM issue WHERE id = "+getId();
+        return sql;
+    }
+
+    @Override
     public int setId(int id) {
         this.id = id;
         return this.id;

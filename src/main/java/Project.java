@@ -66,6 +66,14 @@ public class Project implements DatabaseSqlInterface {
     }
 
     @Override
+    public String makeSelectSql() {
+        String sql =
+                "SELECT * FROM project WHERE id = "+getId();
+        return sql;
+    }
+
+
+    @Override
     public int setId(int id) {
         this.id = id;
         return this.id;
