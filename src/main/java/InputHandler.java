@@ -10,7 +10,7 @@ public class InputHandler {
     /**
      * to stworzy dowolny projekt, błąd lub użytkownika, wystarczy żeby rozróżnić że to insert
      * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
-     * @return zwraca obiekt z id z bazy, nie dodaje issue i user do projektu jeśli na ma liście,
+     * @return zwraca obiekt z id z bazy, nie dodaje issue i user do projektu jeśli są na liście,
      * to robi dopiero update dla projektu
      */
     private Object insert(Object object) {
@@ -21,13 +21,13 @@ public class InputHandler {
     }
 
     /**
-     *
+     * Aktualizuje, jeśli aktualizujemy projekt to stworzą się automatycznie nieistniejący użytkownicy i błędy o
+     * oraz się zaktualizują
      * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
      * @return Object ilość zmian w projekcie
      */
     private Object update(Object object) {
         //update
-        //jeśli aktualizujemy projekt to stworzą się automatycznie nieistniejący użytkownicy i błędy
         DatabaseServer db = DatabaseServer.getInstance();
         return db.update(object);
     }
@@ -53,11 +53,15 @@ public class InputHandler {
         DatabaseServer db = DatabaseServer.getInstance();
         return db.select(object);
     }
-    //TODO: zapis projektu (plików) na serwerze
+    //TODO: zapis projektu (plików) na serwerze, mogą być np zapisywane w folderach o nazwie..
+    // jak tytuł projektu zamiast ścieżek jakichś
+
+    //TODO: pobieranie plików z serwera
     //TODO: String w żadnym obiekcie nie może zawierac apostrofu '
 
     private Object login (Object object) {
         //TODO: logowanie, ustawia odpowiednie connection.logged na true oraz ustawia connection.user na zalogowanego
+        //sprawdzić czy już jest zalogowany (sprawdzenie czy taki jest już przypisany do jakiegoś Connection z listy
         return object;
     }
 
@@ -68,6 +72,7 @@ public class InputHandler {
 
     private Object register(Object object) {
         //TODO: rejestracja, musi robić insert użytkownika, i musimy gdzieś przechowywać hasło i login tego jeszcze nie ma
+        //sprawdzić czy istnieje
         return object;
     }
 }
