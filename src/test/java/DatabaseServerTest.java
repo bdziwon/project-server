@@ -108,10 +108,12 @@ public class DatabaseServerTest {
         {
             int changes = db.delete(project);
             assertThat(changes).isEqualTo(1);
+            changes = db.delete(user);
+            assertThat(changes).isEqualTo(1);
+            changes = db.delete(user2);
+            assertThat(changes).isEqualTo(1);
         }
-
-        //Po teście powinno zostać jedynie dwóch nowych użytkowników, Project i Issue powinien być usunięty.
-
+        //po teście baza powinna być pusta
 
     }
 }
