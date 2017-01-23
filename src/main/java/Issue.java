@@ -2,7 +2,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Created by Bartłomiej Dziwoń on 21.01.2017.
+ * Created by Bartłomiej Dziwoń on 21.01.2017. and others
  */
 public class Issue implements Cloneable, DatabaseSqlInterface {
 	
