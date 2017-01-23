@@ -53,7 +53,21 @@ public class InputHandler {
         DatabaseServer db = DatabaseServer.getInstance();
         return db.select(object);
     }
-    //TODO: Case z rozpoznywaniem operacji
     //TODO: zapis projektu (plików) na serwerze
     //TODO: String w żadnym obiekcie nie może zawierac apostrofu '
+
+    private Object login (Object object) {
+        //TODO: logowanie, ustawia odpowiednie connection.logged na true oraz ustawia connection.user na zalogowanego
+        return object;
+    }
+
+    private Object logout (Object object) {
+        //TODO: Wylogowywanie, ustawia odpowiednie connection.logged na false oraz usuwa connection.user na null
+        return object;
+    }
+
+    private Object register(Object object) {
+        //TODO: rejestracja, musi robić insert użytkownika, i musimy gdzieś przechowywać hasło i login tego jeszcze nie ma
+        return object;
+    }
 }
