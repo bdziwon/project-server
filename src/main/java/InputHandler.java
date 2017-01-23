@@ -46,7 +46,7 @@ public class InputHandler {
     /**
      * Pobiera dane z bazy do obiektu
      * Jeśli to projekt, pobierze także wszystkie błędy i użytkowników do list
-     * @param object
+     * @param object Musi zawierać id obiektu i być odpowiednią klasą
      * @return Obiekt reprezentujący dane z bazy
      */
     private Object select(Object object) {
