@@ -2,9 +2,6 @@ import java.sql.Connection;
 import java.sql.*;
 import java.util.ArrayList;
 
-/**
- * Created by Bartłomiej Dziwoń on 21.01.2017.
- */
 public class DatabaseServer {
 
     private static DatabaseServer db = null;
@@ -342,4 +339,11 @@ public class DatabaseServer {
     }
 
 
+    public DatabaseServerConnectionInfo getConnectionInfo() {
+        return connectionInfo;
+    }
+
+    public void setConnectionInfo(DatabaseServerConnectionInfo connectionInfo) {
+        this.connectionInfo = connectionInfo;
+    }
 }
