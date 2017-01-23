@@ -1,12 +1,24 @@
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.sql.Connection;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * Singleton do obsługi bazy danych
+ * Obsługa:
+ * Wywołujemy getInstance(), następnie pierwszy raz musimy się połączyć za pomocą connect
+ * oraz stworzyć bazy za pomocą createDatabaseIfDoesNotExists i createTablesIfDoesNotExists.
+ * potem możemy wywoływać resztę metod
+ */
 public class DatabaseServer {
 
     private static DatabaseServer db = null;
-    private Connection connection;
+    private Connection connection = null;
     private DatabaseServerConnectionInfo connectionInfo = null;
+    private final Log LOG = LogFactory.getLog(DatabaseServer.class);
+
 
     private DatabaseServer() {
     }
@@ -19,60 +31,94 @@ public class DatabaseServer {
             return db;
         }
     }
+    /**
+     * łączenie z bazą
+     * @param connectionInfo musi zawierać poprawną
+     *                       nazwę użytkownika, hasło, nazwę hosta, i port
+     * @return instancja połączenia {@link Connection}
+     * @throws SQLException SQLException przy złych hasłach itd
+     */
+    public Connection connect(DatabaseServerConnectionInfo connectionInfo) throws IllegalArgumentException, SQLException {
+        if (this.connection != null) {
+            LOG.info("Połączenie nie udane, już połączono");
+            return this.connection;
+        }
 
-
-    public static void main(String[] args) {
-        DatabaseServer db = DatabaseServer.getInstance();
-        db.createTablesIfDoesNotExists();
-    }
-
-
-    public Connection connect(DatabaseServerConnectionInfo connectionInfo) throws SQLException {
-        Connection connection;
+        Connection connection = null;
         String link = "";
         String username = connectionInfo.getUsername();
         String password = connectionInfo.getPassword();
 
+        //sprawdzanie czy link został poprawnie stworzony
         try {
             link = connectionInfo.makeDbLink();
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            throw e;
         }
-        if (username == null || password == null) {
-            connection = DriverManager.getConnection(link);
-        } else {
-            connection = DriverManager.getConnection(link, username, password);
+
+        try {
+            if (password == null) {
+                password = "";
+                connectionInfo.setPassword("");
+            }
+
+            //łączenie z mysql
+            if (username == null) {
+                LOG.info("username jest nullem, próba łączenia bez loginu i hasła");
+                connection = DriverManager.getConnection(link);
+            } else {
+                LOG.info("łączenie za pomocą hasła");
+                connection = DriverManager.getConnection(link, username, password);
+            }
         }
+        catch(SQLException e) {
+            throw e;
+        }
+
+        //nie chcemy nulla
         if (connection == null) {
-            return null;
+            LOG.error("Połączenie nieudane, zwrócono null");
+            return connection;
         }
+
+        LOG.info("Połaczenie udane!");
         this.connectionInfo = connectionInfo;
         this.connection = connection;
         return connection;
     }
 
-    public void createDatabaseIfDoesNotExists(String database) {
+    /**
+     * Tworzy bazę danych "database" i wybiera ją w {@link Connection}
+     */
+    public void createDatabaseIfDoesNotExists() {
         String sql =
-                "CREATE DATABASE `" + database + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+                "CREATE DATABASE `" + "database" + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+
         try {
             connection.createStatement().executeUpdate(sql);
+            connection.setCatalog("database");
         } catch (SQLException e) {
             if (e.toString().contains("database exists")) {
-                System.out.println("Tworzenie bazy: Baza już istnieje");
+                //Obsługiwany wyjątek
+
+                LOG.info("Baza już istnieje");
+                try {
+                    connection.setCatalog("database");
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+
             } else {
+                //Nieoczekiwany wyjątek
+
                 e.printStackTrace();
             }
         }
     }
 
-    public void chooseDatabase(String database) {
-        try {
-            connection.setCatalog(database);
-        } catch (SQLException e) {
-            System.out.println("Zmiana bazy nie powiodła się");
-        }
-    }
-
+    /**
+     * tworzy tabele w bazie "database"
+     */
     @SuppressWarnings("SqlResolve")
     public void createTablesIfDoesNotExists() {
         try {
@@ -128,7 +174,8 @@ public class DatabaseServer {
 
     /**
      * Wstawia obiekt do odpowiedniej tabeli
-     * UWAGA: INSERT nie wrzuca błędów i użytkowników, to robi UPDATE.
+     * UWAGA: INSERT nie wrzuca błędów i użytkowników projektów, to robi UPDATE.
+     * Aby wrzucić cały projekt robimy najpierw insert, później update
      * Insert wrzuca projekt z ustawionymi własnymi parametrami
      *
      * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
@@ -140,16 +187,17 @@ public class DatabaseServer {
         if (Issue.class != c && Project.class != c && User.class != c) {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
+
         //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeInsertSql();
-        System.out.println(sql);
         try {
             Statement statement = connection.createStatement();
             int changes = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
             if (changes == 0) {
-                System.out.println("Błąd insert, brak zmian w tabeli");
+                LOG.error("Brak zmian w tabeli");
             } else {
+                LOG.info(changes+" zmian w tabeli");
                 ResultSet keys = statement.getGeneratedKeys();
                 if (keys.next()) {
                     sqlInterface.setId(keys.getInt(1));
@@ -176,14 +224,12 @@ public class DatabaseServer {
         if (Issue.class != c && Project.class != c && User.class != c) {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
-
         //wysyłanie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeDeleteSql();
-        System.out.println(sql);
         try {
             int changes = connection.createStatement().executeUpdate(sql);
-            System.out.println("Usuniętych pozycji: " + changes);
+            LOG.info("Usuniętych pozycji: " + changes);
             return changes;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -203,7 +249,6 @@ public class DatabaseServer {
         //wysyłanie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeSelectSql();
-        System.out.println(sql);
         Object result = null;
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
@@ -219,7 +264,7 @@ public class DatabaseServer {
         } else {
             Project project = (Project) result;
             sql =
-                    "SELECT * FROM issue WHERE id_project = "+project.getId();
+                    "SELECT * FROM issue WHERE id_project = " + project.getId();
 
             try {
                 ResultSet resultSet = connection.createStatement().executeQuery(sql);
@@ -233,12 +278,11 @@ public class DatabaseServer {
             }
 
             sql =
-                    "SELECT * FROM project_user WHERE id_project = "+project.getId();
+                    "SELECT * FROM project_user WHERE id_project = " + project.getId();
 
             try {
                 ResultSet resultSet = connection.createStatement().executeQuery(sql);
                 while (resultSet.next()) {
-                    System.out.println("Pobieranie user_id");
                     int userId = resultSet.getInt(3);
                     User user = new User();
                     user.setId(userId);
@@ -248,7 +292,6 @@ public class DatabaseServer {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
             return project;
         }
     }
@@ -271,11 +314,10 @@ public class DatabaseServer {
         //wysyłanie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeUpdateSql();
-        System.out.println(sql);
         int changes = 0;
         try {
             changes = connection.createStatement().executeUpdate(sql);
-            System.out.println("Zaktualizowane pozycje: " + changes);
+            LOG.info("Zaktualizowane pozycje: " + changes);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -300,11 +342,9 @@ public class DatabaseServer {
                     results = db.connection.createStatement().executeQuery(sql);
                     results.last();
                     if (results.getRow() > 0) {
-                        //System.out.println("Issue istnieje");
                         changes = changes + db.update(issue);
 
                     } else {
-                        //System.out.println("Issue nie istnieje");
                         db.insert(issue);
                     }
                 } catch (SQLException e) {
