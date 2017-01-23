@@ -2,25 +2,34 @@
 public class InputHandler {
 
     public Object handle(Object object) {
-        //case...
+        //todo: case, ten parametr object może być jakiejś klasy z...
+        // String i Object żeby po stringu rozpoznać którą operację robić, insert update delete select itd
         return object;
     }
 
+    /**
+     * to stworzy dowolny projekt, błąd lub użytkownika, wystarczy żeby rozróżnić że to insert
+     * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
+     * @return zwraca obiekt z id z bazy, nie dodaje issue i user do projektu jeśli na ma liście,
+     * to robi dopiero update dla projektu
+     */
     private Object insert(Object object) {
-            // to stworzy dowolny projekt, błąd lub użytkownika, wystarczy żeby rozróżnić że to insert
             DatabaseServer db = DatabaseServer.getInstance();
             object = db.insert(object);
 
-            //zwraca obiekt z id z bazy, nie dodaje issue i user do projektu jeśli na ma liście, to robi dopiero update dla projektu
             return object;
     }
 
+    /**
+     *
+     * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
+     * @return Object ilość zmian w projekcie
+     */
     private Object update(Object object) {
         //update
         //jeśli aktualizujemy projekt to stworzą się automatycznie nieistniejący użytkownicy i błędy
         DatabaseServer db = DatabaseServer.getInstance();
-        object = db.update(object);
-        return object;
+        return db.update(object);
     }
 
     /**
