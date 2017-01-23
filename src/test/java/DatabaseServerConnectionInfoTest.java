@@ -15,7 +15,6 @@ public class DatabaseServerConnectionInfoTest {
         DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo();
         connectionInfo.setHostname("localhost");
         connectionInfo.setPort("3306");
-        connectionInfo.setDatabase("javabase");
         assertThat(connectionInfo.makeDbLink()).isEqualTo(expected);
     }
 
