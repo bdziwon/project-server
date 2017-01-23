@@ -1,4 +1,3 @@
-import org.apache.commons.logging.impl.Log4JLogger;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
 import java.sql.*;
