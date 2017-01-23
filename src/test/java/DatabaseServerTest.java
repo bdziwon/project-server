@@ -45,65 +45,42 @@ public class DatabaseServerTest {
         db.createTablesIfDoesNotExists();
 
         //insert
-        User user = new User();
-        Project project = new Project();
-        Issue issue = new Issue();
-        {
-            user.setName("Bartek");
-            user.setSurname("Dz");
-            user.setJobTitle("PROGRAMISTA");
-            int id = user.getId();
-            user = (User) db.insert(user);
-            int newId = user.getId();
-            assertThat(id).isNotEqualTo(newId);
-            assertThat(newId).isGreaterThan(0);
-        }
-        {
-            issue.setTitle("title");
-            int id = issue.getId();
-            issue = (Issue) db.insert(issue);
-            int newId = issue.getId();
-            assertThat(id).isNotEqualTo(newId);
-            assertThat(newId).isGreaterThan(0);
-        }
-        {
-            project.setTitle("title");
-            int id = project.getId();
-            project = (Project) db.insert(project);
-            int newId = project.getId();
-            assertThat(id).isNotEqualTo(newId);
-            assertThat(newId).isGreaterThan(0);
-        }
 
-        //update
+        Project project = new Project();
+        project.setTitle("Mój projekt");
+        Issue issue  = new Issue();
+        Issue issue2 = new Issue();
+        issue.setTitle("Błąd 1");
+        issue2.setTitle("Błąd 2");
+        project.addIssue(issue);
+        project.addIssue(issue2);
+
+        User user  = new User();
+        User user2 = new User();
+        user.setName("Heniek");
+        user2.setName("Maniek");
+        project.addUser(user);
+        project.addUser(user2);
+
+        project = (Project) db.insert(project);
+
+        //!! ISSUE musi mieć ustawione id projektu przed dodaniem lub wywołaniem bo inaczej będzie wyjątek sqla
+        issue.setProjectId(project.getId());
+        issue2.setProjectId(project.getId());
+
         {
-            user.setName("Mikołaj");
-            int changes = db.update(user);
-            assertThat(changes).isGreaterThan(0);
-        }
-        {
-            project.setDescription("New description");
             int changes = db.update(project);
-            assertThat(changes).isGreaterThan(0);
+            assertThat(changes).isEqualTo(3);
         }
+        issue.setTitle("Błąd 3");
+        user.setName("Bożena");
         {
-            issue.setDescription("New description");
-            int changes = db.update(issue);
-            assertThat(changes).isGreaterThan(0);
-        }
-        
-        //delete
-        {
-            int changes = db.delete(user);
-            assertThat(changes).isGreaterThan(0);
+            int changes = db.update(project);
+            assertThat(changes).isEqualTo(5);
         }
         {
             int changes = db.delete(project);
-            assertThat(changes).isGreaterThan(0);
-        }
-        {
-            int changes = db.delete(issue);
-            assertThat(changes).isGreaterThan(0);
+            assertThat(changes).isEqualTo(1);
         }
     }
 }

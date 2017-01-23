@@ -31,6 +31,14 @@ public class Project implements DatabaseSqlInterface {
         return id;
     }
 
+    public void addIssue(Issue issue) {
+        issues.add(issue);
+    }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
+
     @Override
     public String makeUpdateSql() {
         String sql =
@@ -56,6 +64,14 @@ public class Project implements DatabaseSqlInterface {
 
         return sql;
     }
+
+    @Override
+    public String makeSelectSql() {
+        String sql =
+                "SELECT * FROM project WHERE id = "+getId();
+        return sql;
+    }
+
 
     @Override
     public int setId(int id) {
