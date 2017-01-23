@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class DatabaseServer {
 
     private static DatabaseServer db = null;
-    private Statement statement;
+    private Connection connection;
     private DatabaseServerConnectionInfo connectionInfo = null;
 
     private DatabaseServer() {
@@ -30,7 +30,7 @@ public class DatabaseServer {
     }
 
 
-    public Statement connect(DatabaseServerConnectionInfo connectionInfo) throws SQLException {
+    public Connection connect(DatabaseServerConnectionInfo connectionInfo) throws SQLException {
         Connection connection;
         String link = "";
         String username = connectionInfo.getUsername();
@@ -49,16 +49,16 @@ public class DatabaseServer {
         if (connection == null) {
             return null;
         }
-        this.statement = connection.createStatement();
         this.connectionInfo = connectionInfo;
-        return statement;
+        this.connection = connection;
+        return connection;
     }
 
     public void createDatabaseIfDoesNotExists(String database) {
         String sql =
-                "CREATE DATABASE `"+database+"` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+                "CREATE DATABASE `" + database + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
         try {
-            statement.executeUpdate(sql);
+            connection.createStatement().executeUpdate(sql);
         } catch (SQLException e) {
             if (e.toString().contains("database exists")) {
                 System.out.println("Tworzenie bazy: Baza już istnieje");
@@ -70,14 +70,13 @@ public class DatabaseServer {
 
     public void chooseDatabase(String database) {
         try {
-            Connection c = statement.getConnection();
-            c.setCatalog(database);
-            this.statement = c.createStatement();
+            connection.setCatalog(database);
         } catch (SQLException e) {
             System.out.println("Zmiana bazy nie powiodła się");
         }
     }
 
+    @SuppressWarnings("SqlResolve")
     public void createTablesIfDoesNotExists() {
         try {
             String sql =
@@ -86,10 +85,9 @@ public class DatabaseServer {
                             "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
                             "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
                             "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL)";
-                            //W takim wierszu domyślnym jest pierwsza wartość enuma
+            //W takim wierszu domyślnym jest pierwsza wartość enuma
 
-            statement.executeUpdate(sql);
-
+            connection.createStatement().executeUpdate(sql);
 
 
             sql =
@@ -97,9 +95,9 @@ public class DatabaseServer {
                             "id          INT(5)                           NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "title       VARCHAR(50)                      NOT NULL DEFAULT 'Brak tytułu'," +
                             "description VARCHAR(150)                     NOT NULL DEFAULT 'Brak opisu')";
-                            //bez pól do błędów i użytkowników, potrzebne osobne tabele project_user, project_issue
+            //bez pól do błędów i użytkowników, potrzebne osobne tabele project_user, project_issue
 
-            statement.executeUpdate(sql);
+            connection.createStatement().executeUpdate(sql);
 
             sql =
                     "CREATE TABLE IF NOT EXISTS issue (" +
@@ -112,7 +110,7 @@ public class DatabaseServer {
                             "ON DELETE CASCADE)";
             //W takim wierszu domyślnym jest pierwsza wartość enuma
 
-            statement.executeUpdate(sql);
+            connection.createStatement().executeUpdate(sql);
 
             sql =
                     "CREATE TABLE IF NOT EXISTS project_user(" +
@@ -124,7 +122,7 @@ public class DatabaseServer {
                             "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id) " +
                             "ON DELETE CASCADE)";
 
-            statement.executeUpdate(sql);
+            connection.createStatement().executeUpdate(sql);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -135,6 +133,7 @@ public class DatabaseServer {
      * Wstawia obiekt do odpowiedniej tabeli
      * UWAGA: INSERT nie wrzuca błędów i użytkowników, to robi UPDATE.
      * Insert wrzuca projekt z ustawionymi własnymi parametrami
+     *
      * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
      * @return Obiekt z wypełnionym polem ID odpowiadającym polu w bazie
      */
@@ -145,11 +144,12 @@ public class DatabaseServer {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
         //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
-        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface)object;
+        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeInsertSql();
         System.out.println(sql);
         try {
-            int changes = statement.executeUpdate(sql,Statement.RETURN_GENERATED_KEYS);
+            Statement statement = connection.createStatement();
+            int changes = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
             if (changes == 0) {
                 System.out.println("Błąd insert, brak zmian w tabeli");
             } else {
@@ -166,22 +166,27 @@ public class DatabaseServer {
 
     /**
      * Usuwa obiekt z tabeli sprawdzając id
+     *
      * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}  <br>
      *               ID obiektu musi być większe od -1
      * @return int z liczbą usuniętych wierszy
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException Wyjątek gdy damy obiekt niewspieranej klasy
      */
     public int delete(Object object) throws IllegalArgumentException {
+
+        //sprawdzanie typu klasy
         Class<?> c = object.getClass();
         if (Issue.class != c && Project.class != c && User.class != c) {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
+
+        //wysyłanie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeDeleteSql();
         System.out.println(sql);
         try {
-            int changes = statement.executeUpdate(sql);
-            System.out.println("Usuniętych pozycji: "+changes);
+            int changes = connection.createStatement().executeUpdate(sql);
+            System.out.println("Usuniętych pozycji: " + changes);
             return changes;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -189,33 +194,100 @@ public class DatabaseServer {
         return 0;
     }
 
-    /**
-     * Aktualizuje odpowiednik obiektu w tabeli
-     * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
-     * @return Liczba zaktualizowanych wierszy
-     */
-    public int update(Object object) {
+    @SuppressWarnings("SqlResolve")
+    public Object select(Object object) throws IllegalArgumentException {
+
+        //sprawdzanie typu klasy
         Class<?> c = object.getClass();
         if (Issue.class != c && Project.class != c && User.class != c) {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
+
+        //wysyłanie zapytania
+        DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
+        String sql = sqlInterface.makeSelectSql();
+        System.out.println(sql);
+        Object result = null;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            if (resultSet.next()) {
+                result = sqlInterface.resultSetToObject(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (result == null || c != Project.class) {
+            return result;
+        } else {
+            Project project = (Project) result;
+            sql =
+                    "SELECT * FROM issue WHERE id_project = "+project.getId();
+
+            try {
+                ResultSet resultSet = connection.createStatement().executeQuery(sql);
+                while (resultSet.next()) {
+                    Issue issue = new Issue();
+                    issue = issue.resultSetToObject(resultSet);
+                    project.addIssue(issue);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            sql =
+                    "SELECT * FROM project_user WHERE id_project = "+project.getId();
+
+            try {
+                ResultSet resultSet = connection.createStatement().executeQuery(sql);
+                while (resultSet.next()) {
+                    System.out.println("Pobieranie user_id");
+                    int userId = resultSet.getInt(3);
+                    User user = new User();
+                    user.setId(userId);
+                    user = (User) db.select(user);
+                    project.addUser(user);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return project;
+        }
+    }
+
+    /**
+     * Aktualizuje odpowiednik obiektu w tabeli
+     *
+     * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
+     * @return Liczba zaktualizowanych wierszy
+     */
+    @SuppressWarnings("SqlResolve")
+    public int update(Object object) {
+
+        //sprawdzanie typu klasy
+        Class<?> c = object.getClass();
+        if (Issue.class != c && Project.class != c && User.class != c) {
+            throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
+        }
+
+        //wysyłanie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeUpdateSql();
         System.out.println(sql);
         int changes = 0;
         try {
-            changes = statement.executeUpdate(sql);
-            System.out.println("Zaktualizowane pozycje: "+changes);
+            changes = connection.createStatement().executeUpdate(sql);
+            System.out.println("Zaktualizowane pozycje: " + changes);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         if (c == Project.class) {
 
-            //TODO: Dla Project musi dodatkowo dodawać wiersze do tabel łączących
             Project project = (Project) object;
 
             ArrayList<Issue> issues = project.getIssues();
-            ArrayList<User>  users = project.getUsers();
+            ArrayList<User> users = project.getUsers();
             ResultSet results;
 
             //sprawdź czy issue istnieje
@@ -223,20 +295,20 @@ public class DatabaseServer {
             //jeśli tak, tylko update issue
 
             for (Issue issue : issues
-                 ) {
+                    ) {
                 sql =
-                        "SELECT * FROM issue WHERE id = "+issue.getId();
+                        "SELECT * FROM issue WHERE id = " + issue.getId();
 
                 try {
-                    results = db.statement.executeQuery(sql);
+                    results = db.connection.createStatement().executeQuery(sql);
                     results.last();
                     if (results.getRow() > 0) {
-                        System.out.println("Issue istnieje");
+                        //System.out.println("Issue istnieje");
                         changes = changes + db.update(issue);
 
                     } else {
-                        System.out.println("Issue nie istnieje");
-                        issue = (Issue) db.insert(issue);
+                        //System.out.println("Issue nie istnieje");
+                        db.insert(issue);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -246,10 +318,10 @@ public class DatabaseServer {
             for (User user : users
                     ) {
                 sql =
-                        "SELECT * FROM user WHERE id = "+user.getId();
+                        "SELECT * FROM user WHERE id = " + user.getId();
 
                 try {
-                    results = db.statement.executeQuery(sql);
+                    results = db.connection.createStatement().executeQuery(sql);
                     results.last();
                     if (results.getRow() > 0) {
                         changes = changes + db.update(user);
@@ -258,14 +330,13 @@ public class DatabaseServer {
                         user = (User) db.insert(user);
                         sql =
                                 "INSERT INTO project_user(id_project, id_user) " +
-                                        "VALUES ("+project.getId()+","+user.getId()+")";
-                        changes = changes + db.statement.executeUpdate(sql);
+                                        "VALUES (" + project.getId() + "," + user.getId() + ")";
+                        changes = changes + db.connection.createStatement().executeUpdate(sql);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-            }            
-            
+            }
         }
         return changes;
     }
