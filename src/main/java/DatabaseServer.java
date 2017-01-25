@@ -5,7 +5,13 @@ import java.util.ArrayList;
 /**
  * Created by Bartłomiej Dziwoń on 21.01.2017.
  */
+
 public class DatabaseServer {
+    //TODO: dodać do Usera login i hasło nigdy nie zwracane do klienta bo nie będzie takich pól w klasie User
+    //TODO: Zrobić selecta do logowania żeby zwracał usera z którym zgadza się podane login i hasło
+
+    //TODO: Zrobić selecta który zwraca listę wszystkich projektów ale bez ich issues i users, koniecznie z id,
+    // można skorzystać z metody select aby pobierać zawartość pojedynczych
 
     private static DatabaseServer db = null;
     private Statement statement;
@@ -270,5 +276,34 @@ public class DatabaseServer {
         return changes;
     }
 
+    
+    //TODO: Zrobić selecta który zwraca listę wszystkich użytkowników
+    // można skorzystać z metody select aby pobierać zawartość pojedynczych 
+    public ArrayList<User> getUserList(){
+    	ResultSet results=null;
+    	ArrayList<User> list= new ArrayList<User>();
+        String sql;
+        User user = null;
+        int i=1;
+        
+        
+        do{
+        	sql= "SELECT * FROM user WHERE id="+i; 	
+
+        	try {
+                results = db.statement.executeQuery(sql);
+                if(results!=null)
+                	{
+                	user=new User();                	
+                	user.resultSetToObject(results);
+                	list.add(user);
+                	}
+                } 
+        	catch (SQLException e){
+                    	e.printStackTrace();
+                		}
+    	}while(results!=null);
+        return list;		
+    }
 
 }
