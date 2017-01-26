@@ -87,10 +87,10 @@ public class DatabaseServer {
                             "id       INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
                             "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
-                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL)"+
+                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL,"+
                             //W takim wierszu domyślnym jest pierwsza wartość enuma
                             "username VARCHAR(50)                         NOT NULL DEFAULT 'pusto',"+
-                            "password VARCHAR(50)                         NOT NULL DEFAULT 'pusto'";
+                            "password VARCHAR(50)                         NOT NULL DEFAULT 'pusto')";
 
             statement.executeUpdate(sql);
 
