@@ -7,11 +7,7 @@ import java.util.ArrayList;
  */
 
 public class DatabaseServer {
-    //TODO: dodać do Usera login i hasło nigdy nie zwracane do klienta bo nie będzie takich pól w klasie User
-    //TODO: Zrobić selecta do logowania żeby zwracał usera z którym zgadza się podane login i hasło
-
-    //TODO: Zrobić selecta który zwraca listę wszystkich projektów ale bez ich issues i users, koniecznie z id,
-    // można skorzystać z metody select aby pobierać zawartość pojedynczych
+	
 
     private static DatabaseServer db = null;
     private Statement statement;
@@ -91,8 +87,10 @@ public class DatabaseServer {
                             "id       INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
                             "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
-                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL)";
+                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL)"+
                             //W takim wierszu domyślnym jest pierwsza wartość enuma
+                            "username VARCHAR(50)                         NOT NULL DEFAULT 'pusto',"+
+                            "password VARCHAR(50)                         NOT NULL DEFAULT 'pusto'";
 
             statement.executeUpdate(sql);
 
@@ -277,8 +275,7 @@ public class DatabaseServer {
     }
 
     
-    //TODO: Zrobić selecta który zwraca listę wszystkich użytkowników
-    // można skorzystać z metody select aby pobierać zawartość pojedynczych 
+
     public ArrayList<User> getUserList(){
     	ResultSet results=null;
     	ArrayList<User> list= new ArrayList<User>();
@@ -306,4 +303,49 @@ public class DatabaseServer {
         return list;		
     }
 
+    public ArrayList<Project> getProjectList(){
+    	ResultSet results=null;
+    	ArrayList<Project> list= new ArrayList<Project>();
+        String sql;
+        Project project = null;
+        int i=1;
+        
+        
+        do{
+        	sql= "SELECT * FROM project WHERE id="+i; 	
+
+        	try {
+                results = db.statement.executeQuery(sql);
+                if(results!=null)
+                	{
+                	project=new Project();                	
+                	project.resultSetToObject(results);
+                	list.add(project);
+                	}
+                } 
+        	catch (SQLException e){
+                    	e.printStackTrace();
+                		}
+    	}while(results!=null);
+        return list;		
+    }
+    
+    
+    public User getUserByLogin(String username, String password){
+    	ResultSet results=null;
+        String sql;
+        User user=new User();  
+        
+        sql= "SELECT * FROM user WHERE username="+username+" AND password="+password;
+
+        	try {
+                results = db.statement.executeQuery(sql);
+                if(results!=null)user.resultSetToObject(results);
+                }
+        	catch (SQLException e){
+                    	e.printStackTrace();
+                		}
+        	
+        return user;		
+    }
 }
