@@ -57,8 +57,8 @@ public class DatabaseServer {
             return this.connection;
         }
 
-        Connection connection = null;
-        String link = "";
+        Connection connection;
+        String link;
         String username = connectionInfo.getUsername();
         String password = connectionInfo.getPassword();
 
