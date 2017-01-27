@@ -3,6 +3,9 @@ package net;
 import util.InputHandler;
 import util.User;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class Connection {
@@ -18,6 +21,13 @@ public class Connection {
             @Override
             public void run() {
                 //TODO: wątek korzystający z InputHandlera do wymiany z klientem
+                try {
+                    ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream input  = new ObjectInputStream(socket.getInputStream());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
         thread.start();
