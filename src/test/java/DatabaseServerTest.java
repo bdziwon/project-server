@@ -1,61 +1,76 @@
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
-import java.sql.SQLException;
-import java.sql.Statement;
+import sql.DatabaseServer;
+import util.DatabaseServerConnectionInfo;
+import util.Issue;
+import util.Project;
+import util.User;
 
+import java.sql.*;
+import java.sql.Connection;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-/**
- * Created by Bartłomiej Dziwoń on 21.01.2017.
- */
 public class DatabaseServerTest {
 
     @Test
     public void getInstanceShouldReturnSameObject() {
-        DatabaseServer obj  = DatabaseServer.getInstance();
+        DatabaseServer obj = DatabaseServer.getInstance();
         DatabaseServer obj2 = DatabaseServer.getInstance();
         assertThat(obj).isEqualTo(obj2);
     }
 
     @Test
-    public void databaseBasicOperationsTest() {
+    public void connectShouldThrowIllegalArgumentException() {
+        DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo();
+        DatabaseServer db = DatabaseServer.getInstance();
+        ThrowableAssert.ThrowingCallable connectAction = () -> db.connect(connectionInfo);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(connectAction);
+    }
 
+    @Test
+    public void connectWithWrongLoginOrPasswordShouldThrowSQLException() {
+        DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo("localhost","3306","aa","bb");
+        DatabaseServer db = DatabaseServer.getInstance();
+        final Connection[] connection = new Connection[1];
+        ThrowableAssert.ThrowingCallable connectAction = () -> connection[0] = db.connect(connectionInfo);
+        assertThatExceptionOfType(SQLException.class).isThrownBy(connectAction);
+        assertThat(connection[0]).isNull();
+    }
+
+    @Test
+    public void databaseBasicOperationsTest() {
         //connect
         DatabaseServerConnectionInfo connectionInfo =
-                new DatabaseServerConnectionInfo("localhost","5555", "database");
+                new DatabaseServerConnectionInfo("localhost", "3306");
         connectionInfo.setUsername("root");
         connectionInfo.setPassword("");
-        connectionInfo.setDatabase("database");
 
         DatabaseServer db = DatabaseServer.getInstance();
         try {
-            Statement statement;
-            statement = db.connect(connectionInfo);
-            assertThat(statement).isNotNull();
+            Connection connection = db.connect(connectionInfo);
+            assertThat(connection.createStatement()).isNotNull();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        //create database
-        db.createDatabaseIfDoesNotExists(   "database");
-
-        //choose database
-        db.chooseDatabase("database");
+        //Tworzenie i wybór bazy database
+        db.createDatabaseIfDoesNotExists();
 
         //create tables
         db.createTablesIfDoesNotExists();
 
         //insert
-
         Project project = new Project();
         project.setTitle("Mój projekt");
-        Issue issue  = new Issue();
+        Issue issue = new Issue();
         Issue issue2 = new Issue();
         issue.setTitle("Błąd 1");
         issue2.setTitle("Błąd 2");
         project.addIssue(issue);
         project.addIssue(issue2);
 
-        User user  = new User();
+        User user = new User();
         User user2 = new User();
         user.setName("Heniek");
         user2.setName("Maniek");
@@ -64,23 +79,47 @@ public class DatabaseServerTest {
 
         project = (Project) db.insert(project);
 
+        //update
         //!! ISSUE musi mieć ustawione id projektu przed dodaniem lub wywołaniem bo inaczej będzie wyjątek sqla
         issue.setProjectId(project.getId());
         issue2.setProjectId(project.getId());
-
         {
             int changes = db.update(project);
             assertThat(changes).isEqualTo(3);
         }
+        int userid = user.getId();
+
         issue.setTitle("Błąd 3");
         user.setName("Bożena");
         {
             int changes = db.update(project);
             assertThat(changes).isEqualTo(5);
         }
+        //select
+        {
+            //project
+            Project selectedProject = new Project();
+            selectedProject.setId(project.getId());
+            selectedProject = (Project) db.select(selectedProject);
+            assertThat(selectedProject.getIssues().size()).isEqualTo(2);
+            assertThat(selectedProject.getUsers().size()).isEqualTo(2);
+
+            //user
+            user = new User();
+            user.setId(userid);
+            User newUser = (User) db.select(user);
+            assertThat(newUser.getName()).isNotEqualTo(user.getName());
+        }
+        //delete
         {
             int changes = db.delete(project);
             assertThat(changes).isEqualTo(1);
+            changes = db.delete(user);
+            assertThat(changes).isEqualTo(1);
+            changes = db.delete(user2);
+            assertThat(changes).isEqualTo(1);
         }
+        //po teście baza powinna być pusta
+
     }
 }

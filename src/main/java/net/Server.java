@@ -1,3 +1,5 @@
+package net;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -102,7 +104,7 @@ public class Server {
                         clientSocket = serverSocket.accept();
                     } catch (IOException e) {
                         if (serverSocket.isClosed()) {
-                            System.out.println("Server socket has been closed, finishing mainThread.");
+                            System.out.println("net.Server socket has been closed, finishing mainThread.");
                             running = false;
                             continue;
                         }

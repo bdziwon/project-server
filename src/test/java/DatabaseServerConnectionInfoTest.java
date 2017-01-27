@@ -1,5 +1,6 @@
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
+import util.DatabaseServerConnectionInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -15,7 +16,6 @@ public class DatabaseServerConnectionInfoTest {
         DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo();
         connectionInfo.setHostname("localhost");
         connectionInfo.setPort("3306");
-        connectionInfo.setDatabase("javabase");
         assertThat(connectionInfo.makeDbLink()).isEqualTo(expected);
     }
 

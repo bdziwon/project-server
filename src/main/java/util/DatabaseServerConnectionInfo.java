@@ -1,28 +1,28 @@
+package util;
+
 /**
  * Created by Bartłomiej Dziwoń on 21.01.2017.
  */
 public class DatabaseServerConnectionInfo {
 
-        private String hostname = null;
-        private String port = null;
-        private String username = null;
-        private String password = null;
-        private String database = null;
+    private String hostname = null;
+    private String port = null;
+    private String username = null;
+    private String password = "";
 
     public DatabaseServerConnectionInfo() {
         super();
     }
 
-    public DatabaseServerConnectionInfo(String hostname, String port, String database, String username, String password) {
-        this(hostname,port,database);
+    public DatabaseServerConnectionInfo(String hostname, String port, String username, String password) {
+        this(hostname,port);
         this.username = username;
         this.password = password;
     }
 
-    public DatabaseServerConnectionInfo(String hostname, String port, String database) {
+    public DatabaseServerConnectionInfo(String hostname, String port) {
         this.hostname = hostname;
         this.port = port;
-        this.database = database;
     }
 
     public String getHostname() {
@@ -57,15 +57,7 @@ public class DatabaseServerConnectionInfo {
         this.password = password;
     }
 
-    public String getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(String database) {
-        this.database = database;
-    }
-
-      public String makeDbLink() throws IllegalArgumentException {
+    public String makeDbLink() throws IllegalArgumentException {
         if (getHostname() == null || getPort() == null) {
             throw new IllegalArgumentException("Illegal hostname / port  -> cannot be null");
         }

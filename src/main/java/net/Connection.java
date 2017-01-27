@@ -1,3 +1,8 @@
+package net;
+
+import util.InputHandler;
+import util.User;
+
 import java.net.Socket;
 
 public class Connection {
@@ -7,7 +12,6 @@ public class Connection {
     private Thread thread;
     private User user = null;
     private InputHandler inputHandler;
-
     public Connection(Socket socket) {
         this.socket = socket;
         thread = new Thread(new Runnable() {

@@ -1,2 +1,2 @@
 # project-server
-Server
+net.Server
