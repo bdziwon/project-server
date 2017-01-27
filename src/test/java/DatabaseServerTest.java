@@ -8,6 +8,8 @@ import util.User;
 
 import java.sql.*;
 import java.sql.Connection;
+import java.util.ArrayList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -87,6 +89,11 @@ public class DatabaseServerTest {
             int changes = db.update(project);
             assertThat(changes).isEqualTo(3);
         }
+
+        ArrayList<User> users = db.getUsersList();
+
+        assertThat(users.size()).isEqualTo(2);
+
         int userid = user.getId();
 
         issue.setTitle("Błąd 3");
