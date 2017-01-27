@@ -3,10 +3,30 @@ package util;
 import sql.DatabaseServer;
 public class InputHandler {
 
-    public Object handle(Object object) {
-        //todo: case, ten parametr object może być jakiejś klasy z...
-        // String i Object żeby po stringu rozpoznać którą operację robić, insert update delete select itd
-        return object;
+    public DataPackage handle(DataPackage dataPackage) {
+
+
+        switch (dataPackage.getDetails()) {
+            case "login" :
+                //TODO: to co na fejsie pisałem
+                return dataPackage; // Return to zawsze wynik dla klienta
+
+            case "disconnect" :
+                //TODO: usunąć Connection z listy z klasy Server, zatrzymać wątek w Connection
+                dataPackage.setDetails("disconnected");
+                return  dataPackage;
+
+            case "insert" :
+                //Przykład: powinien zwrócić zinsertowany obiekt w datapackage, to wypełni jego pole id i zwróci do klienta
+                Object object = dataPackage.getObject();
+                object = insert(object);
+                dataPackage.setObject(object);
+                return dataPackage;
+
+            default:
+                return null;
+        }
+
     }
 
     /**
