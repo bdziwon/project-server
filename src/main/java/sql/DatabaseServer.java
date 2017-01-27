@@ -1,5 +1,6 @@
 package sql;
 
+import com.mysql.cj.jdbc.io.ResultSetFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import util.*;
@@ -41,8 +42,10 @@ public class DatabaseServer {
             return db;
         }
     }
+
     /**
      * łączenie z bazą
+     *
      * @param connectionInfo musi zawierać poprawną
      *                       nazwę użytkownika, hasło, nazwę hosta, i port
      * @return instancja połączenia {@link Connection}
@@ -80,8 +83,7 @@ public class DatabaseServer {
                 LOG.info("łączenie za pomocą hasła");
                 connection = DriverManager.getConnection(link, username, password);
             }
-        }
-        catch(SQLException e) {
+        } catch (SQLException e) {
             throw e;
         }
 
@@ -207,7 +209,7 @@ public class DatabaseServer {
             if (changes == 0) {
                 LOG.error("Brak zmian w tabeli");
             } else {
-                LOG.info(changes+" zmian w tabeli");
+                LOG.info(changes + " zmian w tabeli");
                 ResultSet keys = statement.getGeneratedKeys();
                 if (keys.next()) {
                     sqlInterface.setId(keys.getInt(1));
@@ -388,30 +390,34 @@ public class DatabaseServer {
         return changes;
     }
 
-    public ArrayList<User> getUserList(){
-        ResultSet results=null;
-        ArrayList<User> list= new ArrayList<User>();
-        String sql;
-        User user = null;
-        int i=1;
+    public ArrayList<User> getUsersList() {
 
+        ArrayList<User> list = new ArrayList<>();
+        ResultSet results = null;
+        User user = new User();
 
-        do{
-            sql= "SELECT * FROM user WHERE id="+i;
+        //pobieramy wszystkich do jednego resultseta
+        String sql = "SELECT * FROM user";
 
-            try {
-                results = connection.createStatement().executeQuery(sql);
-                if(results!=null)
-                {
-                    user=new User();
-                    user.resultSetToObject(results);
-                    list.add(user);
-                }
+        try {
+            results = connection.createStatement().executeQuery(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            //Iterujemy po resultsecie, resultset zaczyna się przed pierwszym wierszem,
+            // a next daje następny czyli 1,2,3,...
+
+            while (results.next()) {
+                //zamieniamy na obiekt i dodajemy do listy
+                user = user.resultSetToObject(results);
+                list.add(user);
             }
-            catch (SQLException e){
-                e.printStackTrace();
-            }
-        }while(results!=null);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return list;
     }
 
