@@ -1,5 +1,7 @@
 package util;
 
+import util.interfaces.DatabaseSqlInterface;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

@@ -1,9 +1,9 @@
 package sql;
 
-import com.mysql.cj.jdbc.io.ResultSetFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import util.*;
+import util.interfaces.DatabaseSqlInterface;
 
 import java.sql.Connection;
 import java.sql.*;
