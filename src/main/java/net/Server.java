@@ -58,11 +58,11 @@ public class Server {
         //TODO: DISCONNECT ALL CLIENTS
     }
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
 
         //Obsługa portu przez parametr
-        port = getPort(args);
-        run(port);
+        Server server = new Server();
+        server.run(4000);
 
 
     }
@@ -102,6 +102,7 @@ public class Server {
                     //przyjmowanie połączenia
                     try {
                         clientSocket = serverSocket.accept();
+                        LOG.info("Połączono z "+clientSocket.toString());
                     } catch (IOException e) {
                         if (serverSocket.isClosed()) {
                             System.out.println("net.Server socket has been closed, finishing mainThread.");
