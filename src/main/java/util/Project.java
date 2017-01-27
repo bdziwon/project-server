@@ -2,35 +2,46 @@ package util;
 
 import util.interfaces.DatabaseSqlInterface;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
- * Created by Bartłomiej Dziwoń on 21.01.2017.
- */
-public class Project implements DatabaseSqlInterface {
 
-	private int id = -1;
-    private String title            = "Brak tytułu";
-    private String description      = "Brak opisu";
-    private ArrayList<Issue> issues = new ArrayList<Issue>();
-    private ArrayList<User> users   = new ArrayList<User>();
-    
+public class Project implements DatabaseSqlInterface, Serializable {
+
+    private int              id               = -1;
+    private String           title            = "Brak tytułu";
+    private String           description      = "Brak opisu";
+    private ArrayList<Issue> issues           = new ArrayList<Issue>();
+    private ArrayList<User>  users            = new ArrayList<User>();
+
+
+    public Project(){
+
+    }
+
+    public Project(int id, String title, String description){
+        this.id=id;
+        this.title=title;
+        this.description=description;
+    }
+
+
     public String getTitle(){
-    return this.title;
+        return this.title;
     }
 
     public void setTitle(String title){
-    this.title=title;
+        this.title=title;
     }
-    
+
     public String getDescription(){
-    return this.description;
-    }    
-       
+        return this.description;
+    }
+
     public void setDescription(String description){
-    this.description=description;
+        this.description=description;
     }
 
     public int getId() {

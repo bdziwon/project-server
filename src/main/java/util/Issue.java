@@ -2,43 +2,53 @@ package util;
 
 import util.interfaces.DatabaseSqlInterface;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created by Bartłomiej Dziwoń on 21.01.2017.
- */
-public class Issue implements Cloneable, DatabaseSqlInterface {
-	
-	
-    private int id  = -1;
-    private int projectId = -1;
+public class Issue implements Cloneable, DatabaseSqlInterface, Serializable {
+
+
+    private int id              = -1;
+    private int projectId       = -1;
     private String title        = "Brak tytułu";
     private String description  = "Brak opisu";
     private String priority     = "ZWYKŁY";
-    
+
+    public Issue(){
+
+    }
+
+    public Issue(int id, int projectId, String title, String description, String priority){
+        this.id=id;
+        this.projectId=projectId;
+        this.title=title;
+        this.description=description;
+        this.priority=priority;
+    }
+
     public String getTitle(){
-    return this.title;
+        return this.title;
     }
 
     public void setTitle(String title){
-    this.title=title;
+        this.title=title;
     }
-    
+
     public String getDescription(){
-    return this.description;
-    }    
-       
+        return this.description;
+    }
+
     public void setDescription(String description){
-    this.description=description;
-    }     
-    
+        this.description=description;
+    }
+
     public String getPriority(){
-    return this.priority;
-    }    
-       
+        return this.priority;
+    }
+
     public void setPriority(String priority){
-    this.priority=priority;
+        this.priority=priority;
     }
 
     public int getId() {
@@ -85,7 +95,7 @@ public class Issue implements Cloneable, DatabaseSqlInterface {
         this.id = id;
         return this.id;
     }
-    
+
     @Override
     public Issue resultSetToObject(ResultSet resultSet) {
         Issue issue = null;

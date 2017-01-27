@@ -2,19 +2,27 @@ package util;
 
 import util.interfaces.DatabaseSqlInterface;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created by Bartłomiej Dziwoń on 21.01.2017.
- */
 
-public class User implements DatabaseSqlInterface {
+public class User implements DatabaseSqlInterface, Serializable {
 
-    private int id = -1;
-    private String name = "pusto";
-    private String surname = "pusto";
+    private int    id       = -1;
+    private String name     = "pusto";
+    private String surname  = "pusto";
     private String jobTitle = "PROGRAMISTA";
+
+    public User(){
+
+    }
+
+    public User(int id, String name, String surname, String jobTitle){
+        this.id=id;
+        this.surname=surname;
+        this.jobTitle=jobTitle;
+    }
 
     public int getId() {
         return this.id;
