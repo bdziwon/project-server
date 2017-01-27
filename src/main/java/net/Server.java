@@ -2,11 +2,16 @@ package net;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import sql.DatabaseServer;
+import util.DatabaseServerConnectionInfo;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Server {
     private final Log LOG = LogFactory.getLog(Server.class);
@@ -27,7 +32,25 @@ public class Server {
     }
 
     public void run(int p) {
-        System.out.println("Starting up the server..");
+        System.out.println("Start serwera..");
+        System.out.println("Łączenie z bazą..");
+        DatabaseServerConnectionInfo connectionInfo =
+                new DatabaseServerConnectionInfo("localhost", "3306");
+        connectionInfo.setUsername("root");
+        connectionInfo.setPassword("");
+
+        DatabaseServer db = DatabaseServer.getInstance();
+        try {
+            java.sql.Connection connection = db.connect(connectionInfo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //Tworzenie i wybór bazy database
+        db.createDatabaseIfDoesNotExists();
+
+        //create tables
+        db.createTablesIfDoesNotExists();
 
         //inicjacja pól
         port = p;
