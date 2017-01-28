@@ -18,10 +18,7 @@ import java.util.ArrayList;
  */
 
 public class DatabaseServer {
-    //TODO: dodać do Usera login i hasło nigdy nie zwracane do klienta bo nie będzie takich pól w klasie User
-    //TODO: Zrobić selecta do logowania żeby zwracał usera z którym zgadza się podane login i hasło
-    //TODO: Zrobić selecta który zwraca listę wszystkich użytkowników
-    // można skorzystać z metody select aby pobierać zawartość pojedynczych
+
     //TODO: Zrobić selecta który zwraca listę wszystkich projektów ale bez ich issues i users, koniecznie z id,
     // można skorzystać z metody select aby pobierać zawartość pojedynczych
 
