@@ -17,7 +17,7 @@ public class InputHandler {
 
         switch (dataPackage.getDetails()) {
             case "login" :
-                //TODO: to co na fejsie pisałem
+                dataPackage = login(dataPackage);
                 return dataPackage; // Return to zawsze wynik dla klienta
 
             case "disconnect" :
@@ -92,10 +92,22 @@ public class InputHandler {
     //TODO: pobieranie plików z serwera
     //TODO: String w żadnym obiekcie nie może zawierac apostrofu '
 
-    private Object login (Object object) {
-        //TODO: logowanie, ustawia odpowiednie connection.logged na true oraz ustawia connection.user na zalogowanego
+    private DataPackage login (DataPackage dataPackage) {
         //sprawdzić czy już jest zalogowany (sprawdzenie czy taki jest już przypisany do jakiegoś Connection z listy
-        return object;
+
+        DatabaseServer db = DatabaseServer.getInstance();
+        Credentials credentials = (Credentials) dataPackage.getObject();
+        User user = db.select(credentials);
+
+        if (user == null) {
+            dataPackage.setDetails("user not found");
+            return dataPackage;
+        }
+
+        dataPackage.setDetails("logged");
+        dataPackage.setObject(user);
+
+        return dataPackage;
     }
 
     private Object logout (Object object) {
