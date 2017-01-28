@@ -4,6 +4,9 @@ import net.Connection;
 import net.Server;
 import sql.DatabaseServer;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 
 public class InputHandler {
 
@@ -93,7 +96,6 @@ public class InputHandler {
     //TODO: String w żadnym obiekcie nie może zawierac apostrofu '
 
     private DataPackage login (DataPackage dataPackage) {
-        //sprawdzić czy już jest zalogowany (sprawdzenie czy taki jest już przypisany do jakiegoś Connection z listy
 
         DatabaseServer db = DatabaseServer.getInstance();
         Credentials credentials = (Credentials) dataPackage.getObject();
@@ -103,6 +105,31 @@ public class InputHandler {
             dataPackage.setDetails("user not found");
             return dataPackage;
         }
+
+        //sprawdzanie czy jest zalogowany
+        ArrayList<Connection> connections = Server.getConnections();
+        Iterator i = connections.iterator();
+        boolean logged = false;
+
+        while (i.hasNext()) {
+            Connection c = (Connection) i.next();
+            if (c.getLoggedUserId() == user.getId()) {
+                logged = true;
+                break;
+            }
+        }
+
+        if (logged) {
+            //jeśli jest już zalogowany
+            dataPackage.setDetails("already logged");
+            dataPackage.setObject(user);
+
+            return dataPackage;
+        }
+
+        //jeśli nie jest jeszcze zalogowany
+        this.getConnection().setLogged(true);
+        this.getConnection().setLoggedUserId(user.getId());
 
         dataPackage.setDetails("logged");
         dataPackage.setObject(user);
