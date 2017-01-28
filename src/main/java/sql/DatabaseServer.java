@@ -139,8 +139,9 @@ public class DatabaseServer {
                             "id       INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
                             "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
-                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL)";
-            //W takim wierszu domyślnym jest pierwsza wartość enuma
+                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL," +
+                            "login    VARCHAR(50)                         NOT NULL DEFAULT  'pusto'," +
+                            "password VARCHAR(50)                         NOT NULL DEFAULT  'pusto')";
 
             connection.createStatement().executeUpdate(sql);
 
@@ -247,6 +248,42 @@ public class DatabaseServer {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    /**
+     * Pobiera Usera z bazy na podstawie loginu i hasła
+     * @param credentials obiekt zawierający login i hasło
+     * @return zwraca Usera o loginie i haśle lub null jeśli nie znaleziono
+     */
+    public User select(Credentials credentials) {
+
+        ResultSet   resultSet   = null;
+        String      login       = credentials.getLogin();
+        String      password    = credentials.getPassword();
+        User        user        = new User();
+
+        String sql =
+                "SELECT * FROM user " +
+                        "WHERE login = '"+login+"' AND " +
+                        "password = '"+password+"'";
+
+        System.out.println(sql);
+
+        try {
+            resultSet = connection.createStatement().executeQuery(sql);
+            if (resultSet.next()) {
+                user = user.resultSetToObject(resultSet);
+                return user;
+            }
+            return null;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+
+
     }
 
     @SuppressWarnings("SqlResolve")
