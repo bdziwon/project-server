@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class Server {
     private final Log LOG = LogFactory.getLog(Server.class);
-    private ArrayList<Connection> connections;
+    private  static ArrayList<Connection> connections;
     private ServerSocket serverSocket;
     private int port;
 
@@ -170,5 +170,9 @@ public class Server {
 
     public int getDefaultPort() {
         return DEFAULT_PORT;
+    }
+
+    public static void removeConnection(Connection connection) {
+        connections.remove(connection);
     }
 }

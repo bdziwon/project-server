@@ -1,10 +1,19 @@
 package util;
 
+import net.Connection;
+import net.Server;
 import sql.DatabaseServer;
+
+
 public class InputHandler {
 
-    public DataPackage handle(DataPackage dataPackage) {
+    private Connection connection;
 
+    public InputHandler(Connection connection) {
+        this.connection = connection;
+    }
+
+    public DataPackage handle(DataPackage dataPackage) {
 
         switch (dataPackage.getDetails()) {
             case "login" :
@@ -12,7 +21,9 @@ public class InputHandler {
                 return dataPackage; // Return to zawsze wynik dla klienta
 
             case "disconnect" :
-                //TODO: usunąć Connection z listy z klasy Server, zatrzymać wątek w Connection
+                //TODO: usunąć Connection z listy z klasy Server
+                this.getConnection().setActive(false);
+                Server.removeConnection(this.getConnection());
                 dataPackage.setDetails("disconnected");
                 return  dataPackage;
 
@@ -96,5 +107,13 @@ public class InputHandler {
         //TODO: rejestracja, musi robić insert użytkownika, i musimy gdzieś przechowywać hasło i login tego jeszcze nie ma
         //sprawdzić czy istnieje
         return object;
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 }

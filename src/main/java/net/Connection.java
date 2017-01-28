@@ -11,15 +11,25 @@ import java.net.Socket;
 
 public class Connection {
 
-    private boolean logged = false; //status zalogowania
+    /** Status zalogowania, ustawiamy na true jeśli jest zalogowany, oraz ustawiamy usera **/
+    private boolean logged   = false;
+
+    /** ID zalogowanego użytkownika z bazy **/
+    private int loggedUserId = -1;
+
+    /** Ustawiamy na false aby zakończyć połączenie **/
+    private boolean active = true;
+
+    /** Socket do operacji **/
     private Socket socket;
-    private Thread thread;
-    private User user = null;
-    private InputHandler inputHandler = new InputHandler();
+
+    private InputHandler inputHandler = new InputHandler(this);
 
     public Connection(Socket socket) {
+
         this.socket = socket;
-        thread = new Thread(new Runnable() {
+
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 ObjectOutputStream output       = null;
@@ -33,7 +43,7 @@ public class Connection {
                     e.printStackTrace();
                 }
 
-                while(true) {
+                while(active) {
                     try {
                         dataPackage = (DataPackage) input.readObject();
                         if (dataPackage == null) {
@@ -80,11 +90,19 @@ public class Connection {
         this.socket = socket;
     }
 
-    public Thread getThread() {
-        return thread;
+    public int getLoggedUserId() {
+        return loggedUserId;
     }
 
-    public void setThread(Thread thread) {
-        this.thread = thread;
+    public void setLoggedUserId(int loggedUserId) {
+        this.loggedUserId = loggedUserId;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
