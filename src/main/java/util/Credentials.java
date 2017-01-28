@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 
 public class Credentials implements Serializable {
     private String login;
-    private String password;
 
+    private String password;
     public Credentials(String login, String password) {
         this.login    = login;
         this.password = password;
@@ -45,5 +45,14 @@ public class Credentials implements Serializable {
         }
         return true;
     }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
 
 }
