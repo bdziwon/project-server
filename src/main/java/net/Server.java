@@ -15,10 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class Server {
     private final Log LOG = LogFactory.getLog(Server.class);
+
     private  static ArrayList<Connection> connections;
+
     private ServerSocket serverSocket;
     private int port;
-
     private final int DEFAULT_PORT = 4000;
 
     // Wątek przyjmujący połączenia oraz tworzący wątki obsługi
@@ -174,5 +175,13 @@ public class Server {
 
     public static void removeConnection(Connection connection) {
         connections.remove(connection);
+    }
+
+    public static ArrayList<Connection> getConnections() {
+        return connections;
+    }
+
+    public static void setConnections(ArrayList<Connection> connections) {
+        Server.connections = connections;
     }
 }
