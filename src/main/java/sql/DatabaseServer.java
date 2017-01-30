@@ -278,8 +278,33 @@ public class DatabaseServer {
             e.printStackTrace();
             return null;
         }
+    }
 
+    public boolean insertCredentials(User user, Credentials credentials) throws IllegalArgumentException {
+        DatabaseServer db   = DatabaseServer.getInstance();
+        String sql          = "";
+        String login        = credentials.getLogin();
+        String password     = credentials.getPassword();
 
+        if (user.getId() == -1) {
+            throw new IllegalArgumentException("user id is -1");
+        }
+        sql =
+                "UPDATE user " +
+                        "SET " +
+                        "login = '" + login + "', " +
+                        "password = '" + password + "' " +
+                        "WHERE id = " + user.getId();
+        try {
+            int changes = connection.createStatement().executeUpdate(sql);
+            if (changes > 0) {
+                return  true;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
 
     }
 

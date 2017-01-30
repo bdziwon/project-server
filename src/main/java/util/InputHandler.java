@@ -23,6 +23,10 @@ public class InputHandler {
                 dataPackage = login(dataPackage);
                 return dataPackage; // Return to zawsze wynik dla klienta
 
+            case "register" :
+                dataPackage = register(dataPackage);
+                return dataPackage;
+
             case "disconnect" :
                 //TODO: usunąć Connection z listy z klasy Server
                 this.getConnection().setActive(false);
@@ -56,7 +60,7 @@ public class InputHandler {
         return object;
     }
 
-    /**
+        /**
      * Aktualizuje, jeśli aktualizujemy projekt to stworzą się automatycznie nieistniejący użytkownicy i błędy o
      * oraz się zaktualizują
      * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
@@ -137,14 +141,35 @@ public class InputHandler {
         return dataPackage;
     }
 
-    private Object logout (Object object) {
-        //TODO: Wylogowywanie, ustawia odpowiednie connection.logged na false oraz usuwa connection.user na null
-        return object;
+    private DataPackage register(DataPackage dataPackage) {
+
+        DatabaseServer db = DatabaseServer.getInstance();
+        ArrayList<Object> params = (ArrayList<Object>) dataPackage.getObject();
+
+        if (params.size() < 2) {
+            dataPackage.setDetails("expected two params");
+            return dataPackage;
+        }
+        Credentials credentials = (Credentials) params.get(0);
+        if (db.select(credentials) == null) {
+            System.out.println("wstawiam");
+            User user = (User) params.get(1);
+            user = (User) insert(user);
+            if (!db.insertCredentials(user, credentials)) {
+                dataPackage.setDetails("login/password error");
+                return dataPackage;
+            }
+            dataPackage.setDetails("registered");
+            dataPackage.setObject(user);
+            return dataPackage;
+        }
+        dataPackage.setDetails("user exists");
+        return dataPackage;
     }
 
-    private Object register(Object object) {
-        //TODO: rejestracja, musi robić insert użytkownika, i musimy gdzieś przechowywać hasło i login tego jeszcze nie ma
-        //sprawdzić czy istnieje
+
+    private Object logout (Object object) {
+        //TODO: Wylogowywanie, ustawia odpowiednie connection.logged na false oraz usuwa connection.user na null
         return object;
     }
 

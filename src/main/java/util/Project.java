@@ -27,7 +27,6 @@ public class Project implements DatabaseSqlInterface, Serializable {
         this.description=description;
     }
 
-
     public String getTitle(){
         return this.title;
     }
