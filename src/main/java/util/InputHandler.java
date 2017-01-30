@@ -103,7 +103,7 @@ public class InputHandler {
 
         DatabaseServer db = DatabaseServer.getInstance();
         Credentials credentials = (Credentials) dataPackage.getObject();
-        User user = db.select(credentials);
+        User user = db.select(credentials,false);
 
         if (user == null) {
             dataPackage.setDetails("user not found");
@@ -151,7 +151,7 @@ public class InputHandler {
             return dataPackage;
         }
         Credentials credentials = (Credentials) params.get(0);
-        if (db.select(credentials) == null) {
+        if (db.select(credentials, true) == null) {
             System.out.println("wstawiam");
             User user = (User) params.get(1);
             user = (User) insert(user);
