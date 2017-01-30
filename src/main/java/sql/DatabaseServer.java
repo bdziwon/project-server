@@ -10,17 +10,15 @@ import java.sql.*;
 import java.util.ArrayList;
 
 /**
- * Singleton do obsługi bazy danych
- * Obsługa:
- * Wywołujemy getInstance(), następnie pierwszy raz musimy się połączyć za pomocą connect
- * oraz stworzyć bazy za pomocą createDatabaseIfDoesNotExists i createTablesIfDoesNotExists.
- * potem możemy wywoływać resztę metod
+ * Singleton do obsĹ‚ugi bazy danych
+ * ObsĹ‚uga:
+ * WywoĹ‚ujemy getInstance(), nastÄ™pnie pierwszy raz musimy siÄ™ poĹ‚Ä…czyÄ‡ za pomocÄ… connect
+ * oraz stworzyÄ‡ bazy za pomocÄ… createDatabaseIfDoesNotExists i createTablesIfDoesNotExists.
+ * potem moĹĽemy wywoĹ‚ywaÄ‡ resztÄ™ metod
  */
 
 public class DatabaseServer {
 
-    //TODO: Zrobić selecta który zwraca listę wszystkich projektów ale bez ich issues i users, koniecznie z id,
-    // można skorzystać z metody select aby pobierać zawartość pojedynczych
 
     private static DatabaseServer db = null;
     private Connection connection = null;
@@ -41,16 +39,16 @@ public class DatabaseServer {
     }
 
     /**
-     * łączenie z bazą
+     * Ĺ‚Ä…czenie z bazÄ…
      *
-     * @param connectionInfo musi zawierać poprawną
-     *                       nazwę użytkownika, hasło, nazwę hosta, i port
-     * @return instancja połączenia {@link Connection}
-     * @throws SQLException SQLException przy złych hasłach itd
+     * @param connectionInfo musi zawieraÄ‡ poprawnÄ…
+     *                       nazwÄ™ uĹĽytkownika, hasĹ‚o, nazwÄ™ hosta, i port
+     * @return instancja poĹ‚Ä…czenia {@link Connection}
+     * @throws SQLException SQLException przy zĹ‚ych hasĹ‚ach itd
      */
     public Connection connect(DatabaseServerConnectionInfo connectionInfo) throws IllegalArgumentException, SQLException {
         if (this.connection != null) {
-            LOG.info("Połączenie nie udane, już połączono");
+            LOG.info("PoĹ‚Ä…czenie nie udane, juĹĽ poĹ‚Ä…czono");
             return this.connection;
         }
 
@@ -59,7 +57,7 @@ public class DatabaseServer {
         String username = connectionInfo.getUsername();
         String password = connectionInfo.getPassword();
 
-        //sprawdzanie czy link został poprawnie stworzony
+        //sprawdzanie czy link zostaĹ‚ poprawnie stworzony
         try {
             link = connectionInfo.makeDbLink();
         } catch (IllegalArgumentException e) {
@@ -72,12 +70,12 @@ public class DatabaseServer {
                 connectionInfo.setPassword("");
             }
 
-            //łączenie z mysql
+            //Ĺ‚Ä…czenie z mysql
             if (username == null) {
-                LOG.info("username jest nullem, próba łączenia bez loginu i hasła");
+                LOG.info("username jest nullem, prĂłba Ĺ‚Ä…czenia bez loginu i hasĹ‚a");
                 connection = DriverManager.getConnection(link);
             } else {
-                LOG.info("łączenie za pomocą hasła");
+                LOG.info("Ĺ‚Ä…czenie za pomocÄ… hasĹ‚a");
                 connection = DriverManager.getConnection(link, username, password);
             }
         } catch (SQLException e) {
@@ -86,18 +84,18 @@ public class DatabaseServer {
 
         //nie chcemy nulla
         if (connection == null) {
-            LOG.error("Połączenie nieudane, zwrócono null");
+            LOG.error("PoĹ‚Ä…czenie nieudane, zwrĂłcono null");
             return connection;
         }
 
-        LOG.info("Połaczenie udane!");
+        LOG.info("PoĹ‚aczenie udane!");
         this.connectionInfo = connectionInfo;
         this.connection = connection;
         return connection;
     }
 
     /**
-     * Tworzy bazę danych "database" i wybiera ją w {@link Connection}
+     * Tworzy bazÄ™ danych "database" i wybiera jÄ… w {@link Connection}
      */
     public void createDatabaseIfDoesNotExists() {
         String sql =
@@ -108,9 +106,9 @@ public class DatabaseServer {
             connection.setCatalog("database");
         } catch (SQLException e) {
             if (e.toString().contains("database exists")) {
-                //Obsługiwany wyjątek
+                //ObsĹ‚ugiwany wyjÄ…tek
 
-                LOG.info("Baza już istnieje");
+                LOG.info("Baza juĹĽ istnieje");
                 try {
                     connection.setCatalog("database");
                 } catch (SQLException e1) {
@@ -118,7 +116,7 @@ public class DatabaseServer {
                 }
 
             } else {
-                //Nieoczekiwany wyjątek
+                //Nieoczekiwany wyjÄ…tek
 
                 e.printStackTrace();
             }
@@ -146,9 +144,9 @@ public class DatabaseServer {
             sql =
                     "CREATE TABLE IF NOT EXISTS project (" +
                             "id          INT(5)                           NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "title       VARCHAR(50)                      NOT NULL DEFAULT 'Brak tytułu'," +
+                            "title       VARCHAR(50)                      NOT NULL DEFAULT 'Brak tytuĹ‚u'," +
                             "description VARCHAR(150)                     NOT NULL DEFAULT 'Brak opisu')";
-            //bez pól do błędów i użytkowników, potrzebne osobne tabele project_user, project_issue
+            //bez pĂłl do bĹ‚Ä™dĂłw i uĹĽytkownikĂłw, potrzebne osobne tabele project_user, project_issue
 
             connection.createStatement().executeUpdate(sql);
 
@@ -156,12 +154,12 @@ public class DatabaseServer {
                     "CREATE TABLE IF NOT EXISTS issue (" +
                             "id          INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                             "id_project  INT(5)                              NOT NULL," +
-                            "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytułu'," +
+                            "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytuĹ‚u'," +
                             "description VARCHAR(150)                        NOT NULL DEFAULT 'Brak opisu'," +
-                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL, " +
+                            "priority    ENUM('ZWYKĹ�Y','NORMALNY', 'WYSOKI') NOT NULL, " +
                             "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id) " +
                             "ON DELETE CASCADE)";
-            //W takim wierszu domyślnym jest pierwsza wartość enuma
+            //W takim wierszu domyĹ›lnym jest pierwsza wartoĹ›Ä‡ enuma
 
             connection.createStatement().executeUpdate(sql);
 
@@ -184,12 +182,12 @@ public class DatabaseServer {
 
     /**
      * Wstawia obiekt do odpowiedniej tabeli
-     * UWAGA: INSERT nie wrzuca błędów i użytkowników projektów, to robi UPDATE.
-     * Aby wrzucić cały projekt robimy najpierw insert, później update
-     * Insert wrzuca projekt z ustawionymi własnymi parametrami
+     * UWAGA: INSERT nie wrzuca bĹ‚Ä™dĂłw i uĹĽytkownikĂłw projektĂłw, to robi UPDATE.
+     * Aby wrzuciÄ‡ caĹ‚y projekt robimy najpierw insert, pĂłĹşniej update
+     * Insert wrzuca projekt z ustawionymi wĹ‚asnymi parametrami
      *
      * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}
-     * @return Obiekt z wypełnionym polem ID odpowiadającym polu w bazie
+     * @return Obiekt z wypeĹ‚nionym polem ID odpowiadajÄ…cym polu w bazie
      */
     public Object insert(Object object) throws IllegalArgumentException {
 
@@ -198,7 +196,7 @@ public class DatabaseServer {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
 
-        //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
+        //Dla kaĹĽdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeInsertSql();
         try {
@@ -220,12 +218,12 @@ public class DatabaseServer {
     }
 
     /**
-     * Usuwa obiekt z tabeli sprawdzając id
+     * Usuwa obiekt z tabeli sprawdzajÄ…c id
      *
      * @param object Obiekt klasy {@link Issue} {@link User} lub {@link Project}  <br>
-     *               ID obiektu musi być większe od -1
-     * @return int z liczbą usuniętych wierszy
-     * @throws IllegalArgumentException Wyjątek gdy damy obiekt niewspieranej klasy
+     *               ID obiektu musi byÄ‡ wiÄ™ksze od -1
+     * @return int z liczbÄ… usuniÄ™tych wierszy
+     * @throws IllegalArgumentException WyjÄ…tek gdy damy obiekt niewspieranej klasy
      */
     public int delete(Object object) throws IllegalArgumentException {
 
@@ -234,12 +232,12 @@ public class DatabaseServer {
         if (Issue.class != c && Project.class != c && User.class != c) {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
-        //wysyłanie zapytania
+        //wysyĹ‚anie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeDeleteSql();
         try {
             int changes = connection.createStatement().executeUpdate(sql);
-            LOG.info("Usuniętych pozycji: " + changes);
+            LOG.info("UsuniÄ™tych pozycji: " + changes);
             return changes;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -248,9 +246,9 @@ public class DatabaseServer {
     }
 
     /**
-     * Pobiera Usera z bazy na podstawie loginu i hasła
-     * @param credentials obiekt zawierający login i hasło
-     * @return zwraca Usera o loginie i haśle lub null jeśli nie znaleziono
+     * Pobiera Usera z bazy na podstawie loginu i hasĹ‚a
+     * @param credentials obiekt zawierajÄ…cy login i hasĹ‚o
+     * @return zwraca Usera o loginie i haĹ›le lub null jeĹ›li nie znaleziono
      */
     public User select(Credentials credentials) {
 
@@ -292,7 +290,7 @@ public class DatabaseServer {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
 
-        //wysyłanie zapytania
+        //wysyĹ‚anie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeSelectSql();
         Object result = null;
@@ -357,7 +355,7 @@ public class DatabaseServer {
             throw new IllegalArgumentException("Obiekt klasy Issue, Project lub user EXPECTED");
         }
 
-        //wysyłanie zapytania
+        //wysyĹ‚anie zapytania
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeUpdateSql();
         int changes = 0;
@@ -375,9 +373,9 @@ public class DatabaseServer {
             ArrayList<User> users = project.getUsers();
             ResultSet results;
 
-            //sprawdź czy issue istnieje
-            //jeśli nie, stwórz issue i stwórz project_issue
-            //jeśli tak, tylko update issue
+            //sprawdĹş czy issue istnieje
+            //jeĹ›li nie, stwĂłrz issue i stwĂłrz project_issue
+            //jeĹ›li tak, tylko update issue
 
             for (Issue issue : issues
                     ) {
@@ -424,7 +422,7 @@ public class DatabaseServer {
         return changes;
     }
 
-    public ArrayList<User> getUsersList() {
+    public ArrayList<User> getUserList() {
 
         ArrayList<User> list = new ArrayList<>();
         ResultSet results = null;
@@ -440,8 +438,8 @@ public class DatabaseServer {
         }
 
         try {
-            //Iterujemy po resultsecie, resultset zaczyna się przed pierwszym wierszem,
-            // a next daje następny czyli 1,2,3,...
+            //Iterujemy po resultsecie, resultset zaczyna siÄ™ przed pierwszym wierszem,
+            // a next daje nastÄ™pny czyli 1,2,3,...
 
             while (results.next()) {
                 //zamieniamy na obiekt i dodajemy do listy
@@ -454,6 +452,35 @@ public class DatabaseServer {
 
         return list;
     }
+
+    
+    public ArrayList<Project> getProjectList() {
+
+        ArrayList<Project> list = new ArrayList<>();
+        ResultSet results = null;
+        Project project = new Project();
+
+        String sql = "SELECT id,title,description FROM project";
+
+        try {
+            results = connection.createStatement().executeQuery(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            while (results.next()) {
+                project = project.resultSetToObject(results);
+                list.add(project);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }    
+    
 
     public DatabaseServerConnectionInfo getConnectionInfo() {
         return connectionInfo;
