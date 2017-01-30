@@ -480,6 +480,34 @@ public class DatabaseServer {
         return list;
     }
 
+    public ArrayList<Project> getProjectList() {
+
+        ArrayList<Project> list = new ArrayList<>();
+        ResultSet results = null;
+        Project project = new Project();
+
+        String sql = "SELECT id,title,description FROM project";
+
+        try {
+            results = connection.createStatement().executeQuery(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            while (results.next()) {
+                project = project.resultSetToObject(results);
+                list.add(project);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+
     public DatabaseServerConnectionInfo getConnectionInfo() {
         return connectionInfo;
     }
