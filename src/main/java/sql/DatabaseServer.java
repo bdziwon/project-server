@@ -252,18 +252,24 @@ public class DatabaseServer {
      * @param credentials obiekt zawierający login i hasło
      * @return zwraca Usera o loginie i haśle lub null jeśli nie znaleziono
      */
-    public User select(Credentials credentials) {
+    public User select(Credentials credentials, boolean onlyLogin) {
 
         ResultSet   resultSet   = null;
         String      login       = credentials.getLogin();
         String      password    = credentials.getPassword();
         User        user        = new User();
+        String      sql;
 
-        String sql =
+        if (onlyLogin)  {
+            sql =
                 "SELECT * FROM user " +
-                        "WHERE login = '"+login+"' AND " +
-                        "password = '"+password+"'";
-
+                        "WHERE login = '"+login+"'";
+        } else {
+            sql =
+                "SELECT * FROM user " +
+                        "WHERE login = '" + login + "' AND " +
+                        "password = '" + password + "'";
+        }
         System.out.println(sql);
 
         try {
