@@ -15,6 +15,20 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class DatabaseServerTest {
 
+    public void connect() {
+        DatabaseServerConnectionInfo connectionInfo =
+                new DatabaseServerConnectionInfo("localhost", "1521");
+        connectionInfo.setUsername("LORKANO");
+        connectionInfo.setPassword("oracle");
+        DatabaseServer db = DatabaseServer.getInstance();
+        try {
+            Connection connection = db.connect(connectionInfo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        db.createTablesIfDoesNotExists();
+    }
+
     @Test
     public void getInstanceShouldReturnSameObject() {
         DatabaseServer obj = DatabaseServer.getInstance();
@@ -51,11 +65,9 @@ public class DatabaseServerTest {
 
     @Test
     public void dropTables() {
+        connect();
         DatabaseServerConnectionInfo connectionInfo =
                 new DatabaseServerConnectionInfo("localhost", "1521");
-        connectionInfo.setUsername("LORKANO");
-        connectionInfo.setPassword("oracle");
-
         DatabaseServer db = DatabaseServer.getInstance();
         try {
             Connection connection = db.connect(connectionInfo);
@@ -63,16 +75,56 @@ public class DatabaseServerTest {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        db.dropTables();
+
+    }
+
+    @Test
+    public void addingNewProjectTest() {
+        connect();
+        DatabaseServer  db          = DatabaseServer.getInstance();
+        Project         project     = new Project();
+
+        project.setTitle("testowy projekt");
+        project.setDescription("testowy opis");
+
+        project = (Project) db.insert(project);
+        assertThat(project.getId()).isNotEqualTo(-1);
+
+        project = (Project) db.select(project);
+        assertThat(project.getId()).isNotEqualTo(-1);
+
+        User user = new User();
+        user.setName("Testowy");
+
+        User user2 = new User();
+
+        User user3 = new User();
+        user.setName("testowy3");
+
+        user = (User) db.insert(user);
+        assertThat(user.getId()).isNotEqualTo(-1);
+
+        user3 = (User) db.insert(user3);
+        assertThat(user3.getId()).isNotEqualTo(-1);
+
+        project.addUser(user);
+        project.addUser(user2);
+        project.addUser(user3);
+
+        {
+            int changes = db.update(project);
+            assertThat(changes).isEqualTo(3);
+        }
 
     }
 
     @Test
     public void databaseBasicOperationsTest() {
         //connect
+        connect();
         DatabaseServerConnectionInfo connectionInfo =
                 new DatabaseServerConnectionInfo("localhost", "1521");
-        connectionInfo.setUsername("LORKANO");
-        connectionInfo.setPassword("oracle");
 
         DatabaseServer db = DatabaseServer.getInstance();
         try {

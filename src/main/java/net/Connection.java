@@ -50,13 +50,20 @@ public class Connection {
                             continue;
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("Socket eof, koniec połączenia");
+                        inputHandler.handle(new DataPackage("disconnect",new Object()));
                         break;
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
 
                     dataPackage = inputHandler.handle(dataPackage);
+
+                    if (dataPackage.getDetails().equals("skip sending")) {
+                        //nie wysyła, na takie nie czekamy w kliencie
+                        //np logout, disconnect
+                        continue;
+                    }
 
                     if (dataPackage == null) {
                         System.out.println("Nieobsługiwane zapytanie dla serwera");

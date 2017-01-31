@@ -23,22 +23,29 @@ public class InputHandler {
                 dataPackage = login(dataPackage);
                 return dataPackage; // Return to zawsze wynik dla klienta
 
+            case "logout" :
+                dataPackage = logout(dataPackage);
+                return dataPackage;
             case "register" :
                 dataPackage = register(dataPackage);
                 return dataPackage;
 
             case "disconnect" :
-                //TODO: usunąć Connection z listy z klasy Server
-                this.getConnection().setActive(false);
-                Server.removeConnection(this.getConnection());
-                dataPackage.setDetails("disconnected");
-                return  dataPackage;
+                dataPackage = disconnect(dataPackage);
+                return dataPackage;
+
+            case "select username" :
+                dataPackage = selectUserByLogin(dataPackage);
+                return dataPackage;
 
             case "insert" :
-                //Przykład: powinien zwrócić zinsertowany obiekt w datapackage, to wypełni jego pole id i zwróci do klienta
                 Object object = dataPackage.getObject();
                 object = insert(object);
                 dataPackage.setObject(object);
+                return dataPackage;
+
+            case "update" :
+                dataPackage = update(dataPackage);
                 return dataPackage;
 
             default:
@@ -46,6 +53,30 @@ public class InputHandler {
         }
 
     }
+
+    private DataPackage selectUserByLogin(DataPackage dataPackage) {
+        DatabaseServer  db      = DatabaseServer.getInstance();
+        String          login   = (String) dataPackage.getObject();
+        User user = db.selectUserByLogin(login);
+        dataPackage.setObject(user);
+        return dataPackage;
+    }
+
+    private DataPackage logout(DataPackage dataPackage) {
+        this.getConnection().setLoggedUserId(-1);
+        dataPackage.setDetails("skip sending");
+        return dataPackage;
+    }
+
+    private DataPackage disconnect(DataPackage dataPackage) {
+        dataPackage = logout(dataPackage);
+        System.out.println("Rozłączono z "+this.getConnection().getSocket().toString());
+        this.getConnection().setActive(false);
+        Server.removeConnection(this.getConnection());
+        dataPackage.setDetails("skip sending");
+        return  dataPackage;
+    }
+
 
     /**
      * to stworzy dowolny projekt, błąd lub użytkownika, wystarczy żeby rozróżnić że to insert
@@ -63,13 +94,18 @@ public class InputHandler {
         /**
      * Aktualizuje, jeśli aktualizujemy projekt to stworzą się automatycznie nieistniejący użytkownicy i błędy o
      * oraz się zaktualizują
-     * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
      * @return Object ilość zmian w projekcie
      */
-    private Object update(Object object) {
+    private DataPackage update(DataPackage dataPackage) {
         //update
         DatabaseServer db = DatabaseServer.getInstance();
-        return db.update(object);
+        int changes = db.update(dataPackage.getObject());
+        if (changes > 0) {
+            dataPackage.setDetails("added");
+            return dataPackage;
+        }
+        dataPackage.setDetails("error");
+        return dataPackage;
     }
 
     /**

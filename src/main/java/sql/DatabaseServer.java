@@ -1,5 +1,6 @@
 package sql;
 
+import com.mysql.cj.jdbc.io.ResultSetFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import util.*;
@@ -97,35 +98,6 @@ public class DatabaseServer {
     }
 
     /**
-     * Tworzy bazę danych "database" i wybiera ją w {@link Connection}
-     */
-    public void createDatabaseIfDoesNotExists() {
-        String sql =
-                "CREATE DATABASE `" + "database" + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
-
-        try {
-            connection.createStatement().executeUpdate(sql);
-            connection.setCatalog("database");
-        } catch (SQLException e) {
-            if (e.toString().contains("database exists")) {
-                //Obsługiwany wyjątek
-
-                LOG.info("Baza już istnieje");
-                try {
-                    connection.setCatalog("database");
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
-
-            } else {
-                //Nieoczekiwany wyjątek
-
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * tworzy tabele w bazie "database"
      */
     @SuppressWarnings("SqlResolve")
@@ -138,7 +110,7 @@ public class DatabaseServer {
                             "name     VARCHAR2(50)                         DEFAULT 'pusto' NOT NULL," +
                             "surname  VARCHAR2(50)                         DEFAULT 'pusto' NOT NULL," +
                             "jobTitle VARCHAR2(20) CHECK( jobTitle IN ('PROGRAMISTA', 'TESTER', 'ADMINISTRATOR') )," +
-                            "login    VARCHAR2(50)                         DEFAULT  'pusto' NOT NULL," +
+                            "login   VARCHAR2(50)                         DEFAULT  'pusto' NOT NULL," +
                             "password VARCHAR2(50)                         DEFAULT  'pusto' NOT NULL)";
 
             connection.createStatement().executeUpdate(sql);
@@ -427,7 +399,6 @@ public class DatabaseServer {
                         "WHERE login = '" + login + "' AND " +
                         "password = '" + password + "'";
         }
-        System.out.println(sql);
 
         try {
             resultSet = connection.createStatement().executeQuery(sql);
@@ -510,6 +481,38 @@ public class DatabaseServer {
             e.printStackTrace();
         }
 
+        sql = "DROP SEQUENCE user_t_seq";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        sql = "DROP SEQUENCE project_seq";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        sql = "DROP SEQUENCE issue_seq";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        sql = "DROP SEQUENCE project_user_seq";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -572,6 +575,23 @@ public class DatabaseServer {
         }
     }
 
+    public User selectUserByLogin(String login) {
+        String sql =
+                "SELECT * from user_t WHERE login = '"+login+"'";
+
+        User user = new User();
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            if (resultSet.next()) {
+                user = user.resultSetToObject(resultSet);
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
     /**
      * Aktualizuje odpowiednik obiektu w tabeli
      *
@@ -603,7 +623,7 @@ public class DatabaseServer {
 
             ArrayList<Issue> issues = project.getIssues();
             ArrayList<User> users = project.getUsers();
-            ResultSet results;
+            ResultSet results = null;
 
             //sprawdź czy issue istnieje
             //jeśli nie, stwórz issue i stwórz project_issue
@@ -632,27 +652,24 @@ public class DatabaseServer {
                 }
             }
 
-            for (User user : users
-                    ) {
-                sql =
-                        "SELECT * FROM user_t WHERE id = " + user.getId();
-
+            for (User user : users) {
+                if (user.getId() == -1) {
+                    System.out.println("update omija usera z id -1");
+                    continue;
+                }
+                sql = "SELECT * FROM project_user WHERE id_user = " + user.getId();
                 try {
-                    results = db.connection.createStatement(
-                            ResultSet.TYPE_SCROLL_INSENSITIVE,
-                            ResultSet.CONCUR_UPDATABLE
-                    ).executeQuery(sql);
-
-                    results.last();
-                    if (results.getRow() > 0) {
-                        changes = changes + db.update(user);
-
-                    } else {
-                        user = (User) db.insert(user);
-                        sql =
-                                "INSERT INTO project_user(id_project, id_user) " +
-                                        "VALUES (" + project.getId() + "," + user.getId() + ")";
-                        changes = changes + db.connection.createStatement().executeUpdate(sql);
+                    results = db.connection
+                            .createStatement().executeQuery(sql);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    if (!results.next()) {
+                        sql = "INSERT INTO project_USER(id_project, id_user) " +
+                                "VALUES (" + project.getId() + ", " + user.getId() + ")";
+                        changes = changes + db.connection
+                                .createStatement().executeUpdate(sql);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();

@@ -107,4 +107,9 @@ public class User implements DatabaseSqlInterface, Serializable {
         }
         return user;
     }
+
+    @Override
+    public String toString() {
+        return name + " " + surname + ", " + jobTitle;
+    }
 }
