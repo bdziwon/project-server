@@ -75,7 +75,7 @@ public class DatabaseServer {
             //łączenie z mysql
             if (username == null) {
                 LOG.info("username jest nullem, próba łączenia bez loginu i hasła");
-                connection = DriverManager.getConnection(link);
+                connection = DriverManager.getConnection(link,username,password);
             } else {
                 LOG.info("łączenie za pomocą hasła");
                 connection = DriverManager.getConnection(link, username, password);
@@ -130,56 +130,212 @@ public class DatabaseServer {
      */
     @SuppressWarnings("SqlResolve")
     public void createTablesIfDoesNotExists() {
+        String sql;
         try {
-            String sql =
-                    "CREATE TABLE IF NOT EXISTS user (" +
-                            "id       INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "name     VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
-                            "surname  VARCHAR(50)                         NOT NULL DEFAULT 'pusto'," +
-                            "jobTitle ENUM('PROGRAMISTA','TESTER','ADMINISTRATOR') NOT NULL," +
-                            "login    VARCHAR(50)                         NOT NULL DEFAULT  'pusto'," +
-                            "password VARCHAR(50)                         NOT NULL DEFAULT  'pusto')";
+            sql =
+                    "CREATE TABLE user_t (" +
+                            "id       INT                                 NOT NULL PRIMARY KEY," +
+                            "name     VARCHAR2(50)                         DEFAULT 'pusto' NOT NULL," +
+                            "surname  VARCHAR2(50)                         DEFAULT 'pusto' NOT NULL," +
+                            "jobTitle VARCHAR2(20) CHECK( jobTitle IN ('PROGRAMISTA', 'TESTER', 'ADMINISTRATOR') )," +
+                            "login    VARCHAR2(50)                         DEFAULT  'pusto' NOT NULL," +
+                            "password VARCHAR2(50)                         DEFAULT  'pusto' NOT NULL)";
 
             connection.createStatement().executeUpdate(sql);
 
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+        try {
 
             sql =
-                    "CREATE TABLE IF NOT EXISTS project (" +
-                            "id          INT(5)                           NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "title       VARCHAR(50)                      NOT NULL DEFAULT 'Brak tytułu'," +
-                            "description VARCHAR(150)                     NOT NULL DEFAULT 'Brak opisu')";
+                    "CREATE TABLE project (" +
+                            "id          INT                               NOT NULL PRIMARY KEY," +
+                            "title       VARCHAR2(50)                      DEFAULT 'Brak tytułu' NOT NULL," +
+                            "description VARCHAR2(150)                     DEFAULT 'Brak opisu' NOT NULL)";
             //bez pól do błędów i użytkowników, potrzebne osobne tabele project_user, project_issue
 
             connection.createStatement().executeUpdate(sql);
 
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+
             sql =
-                    "CREATE TABLE IF NOT EXISTS issue (" +
-                            "id          INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "id_project  INT(5)                              NOT NULL," +
-                            "title       VARCHAR(50)                         NOT NULL DEFAULT 'Brak tytułu'," +
-                            "description VARCHAR(150)                        NOT NULL DEFAULT 'Brak opisu'," +
-                            "priority    ENUM('ZWYKŁY','NORMALNY', 'WYSOKI') NOT NULL, " +
+                    "CREATE TABLE issue (" +
+                            "id          INT                                 NOT NULL PRIMARY KEY," +
+                            "id_project  INT                                 NOT NULL," +
+                            "title       VARCHAR2(50)                         DEFAULT 'Brak tytułu' NOT NULL," +
+                            "description VARCHAR2(150)                        DEFAULT 'Brak opisu' NOT NULL," +
+                            "priority    VARCHAR2(20) CHECK( priority IN ('ZWYKŁY', 'NORMALNY', 'WYSOKI') )," +
                             "CONSTRAINT project_fk FOREIGN KEY (id_project) REFERENCES project(id) " +
                             "ON DELETE CASCADE)";
             //W takim wierszu domyślnym jest pierwsza wartość enuma
 
             connection.createStatement().executeUpdate(sql);
 
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+
             sql =
-                    "CREATE TABLE IF NOT EXISTS project_user(" +
-                            "id         INT(5)                              NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                            "id_project INT(5)                              NOT NULL," +
-                            "id_user    INT(5)                              NOT NULL," +
+                    "CREATE TABLE project_user(" +
+                            "id         INT                                 NOT NULL PRIMARY KEY," +
+                            "id_project INT                                 NOT NULL," +
+                            "id_user    INT                                 NOT NULL," +
                             "CONSTRAINT project_fk_2 FOREIGN KEY (id_project) REFERENCES project(id)" +
                             "ON DELETE CASCADE," +
-                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user(id) " +
+                            "CONSTRAINT user_fk      FOREIGN KEY (id_user)    REFERENCES user_t(id) " +
                             "ON DELETE CASCADE)";
 
             connection.createStatement().executeUpdate(sql);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
         }
+
+        //AUTOINCREMENT ZAMIAST JEDNEGO SŁOWA W MYSQL
+
+        //USER_T
+        try {
+            sql =
+                    "CREATE SEQUENCE user_t_seq";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+        try {
+
+            sql =
+                    "CREATE OR REPLACE TRIGGER user_t_increment " +
+                            "BEFORE INSERT ON user_t " +
+                            "FOR EACH ROW " +
+                            "BEGIN " +
+                            "SELECT user_t_seq.NEXTVAL " +
+                            "INTO :new.id " +
+                            "from dual; " +
+                            "END;";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+
+        //PROJECT
+        try {
+            sql =
+                    "CREATE SEQUENCE project_seq";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+        try {
+
+            sql =
+                    "CREATE OR REPLACE TRIGGER project_increment " +
+                            "BEFORE INSERT ON project " +
+                            "FOR EACH ROW " +
+                            "BEGIN " +
+                            "SELECT project_seq.NEXTVAL " +
+                            "INTO :new.id " +
+                            "from dual; " +
+                            "END;";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+
+        //ISSUE
+        try {
+            sql =
+                    "CREATE SEQUENCE issue_seq";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+        try {
+
+            sql =
+                    "CREATE OR REPLACE TRIGGER issue_increment " +
+                            "BEFORE INSERT ON issue " +
+                            "FOR EACH ROW " +
+                            "BEGIN " +
+                            "SELECT issue_seq.NEXTVAL " +
+                            "INTO :new.id " +
+                            "from dual; " +
+                            "END;";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+
+        //PROJECT_USER
+        try {
+            sql =
+                    "CREATE SEQUENCE project_user_seq";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+        try {
+
+            sql =
+                    "CREATE OR REPLACE TRIGGER project_user_increment " +
+                            "BEFORE INSERT ON project_user " +
+                            "FOR EACH ROW " +
+                            "BEGIN " +
+                            "SELECT project_user_seq.NEXTVAL " +
+                            "INTO :new.id " +
+                            "from dual; " +
+                            "END;";
+
+            connection.createStatement().executeUpdate(sql);
+
+        } catch (SQLException e) {
+            if (!e.toString().contains("existing object")) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**
@@ -202,8 +358,9 @@ public class DatabaseServer {
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeInsertSql();
         try {
-            Statement statement = connection.createStatement();
-            int changes = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement statement = connection.prepareStatement(sql,new String[] {"id"});
+
+            int changes = statement.executeUpdate();
             if (changes == 0) {
                 LOG.error("Brak zmian w tabeli");
             } else {
@@ -262,11 +419,11 @@ public class DatabaseServer {
 
         if (onlyLogin)  {
             sql =
-                "SELECT * FROM user " +
+                "SELECT * FROM user_t " +
                         "WHERE login = '"+login+"'";
         } else {
             sql =
-                "SELECT * FROM user " +
+                "SELECT * FROM user_t " +
                         "WHERE login = '" + login + "' AND " +
                         "password = '" + password + "'";
         }
@@ -296,7 +453,7 @@ public class DatabaseServer {
             throw new IllegalArgumentException("user id is -1");
         }
         sql =
-                "UPDATE user " +
+                "UPDATE user_t " +
                         "SET " +
                         "login = '" + login + "', " +
                         "password = '" + password + "' " +
@@ -311,6 +468,48 @@ public class DatabaseServer {
             e.printStackTrace();
             return false;
         }
+
+    }
+
+    public void dropTables() {
+
+        String sql;
+
+        sql = "DROP TABLE project CASCADE constraints";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        sql =
+                "DROP TABLE user_t CASCADE constraints";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        sql = "DROP TABLE project_user CASCADE constraints";
+
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        sql = "DROP TABLE issue CASCADE constraints";
+
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -416,7 +615,11 @@ public class DatabaseServer {
                         "SELECT * FROM issue WHERE id = " + issue.getId();
 
                 try {
-                    results = db.connection.createStatement().executeQuery(sql);
+                    results = db.connection.createStatement(
+                            ResultSet.TYPE_SCROLL_INSENSITIVE,
+                            ResultSet.CONCUR_UPDATABLE
+                    ).executeQuery(sql);
+
                     results.last();
                     if (results.getRow() > 0) {
                         changes = changes + db.update(issue);
@@ -432,10 +635,14 @@ public class DatabaseServer {
             for (User user : users
                     ) {
                 sql =
-                        "SELECT * FROM user WHERE id = " + user.getId();
+                        "SELECT * FROM user_t WHERE id = " + user.getId();
 
                 try {
-                    results = db.connection.createStatement().executeQuery(sql);
+                    results = db.connection.createStatement(
+                            ResultSet.TYPE_SCROLL_INSENSITIVE,
+                            ResultSet.CONCUR_UPDATABLE
+                    ).executeQuery(sql);
+
                     results.last();
                     if (results.getRow() > 0) {
                         changes = changes + db.update(user);
@@ -462,7 +669,7 @@ public class DatabaseServer {
         User user = new User();
 
         //pobieramy wszystkich do jednego resultseta
-        String sql = "SELECT * FROM user";
+        String sql = "SELECT * FROM user_t";
 
         try {
             results = connection.createStatement().executeQuery(sql);

@@ -11,8 +11,6 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class Server {
     private final Log LOG = LogFactory.getLog(Server.class);
 
@@ -35,10 +33,18 @@ public class Server {
     public void run(int p) {
         System.out.println("Start serwera..");
         System.out.println("Łączenie z bazą..");
+
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
         DatabaseServerConnectionInfo connectionInfo =
-                new DatabaseServerConnectionInfo("localhost", "3306");
-        connectionInfo.setUsername("root");
-        connectionInfo.setPassword("");
+                new DatabaseServerConnectionInfo("localhost", "1521");
+        connectionInfo.setUsername("LORKANO");
+        connectionInfo.setPassword("oracle");
 
         DatabaseServer db = DatabaseServer.getInstance();
         try {
@@ -48,7 +54,7 @@ public class Server {
         }
 
         //Tworzenie i wybór bazy database
-        db.createDatabaseIfDoesNotExists();
+        //db.createDatabaseIfDoesNotExists();
 
         //create tables
         db.createTablesIfDoesNotExists();

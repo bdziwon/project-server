@@ -61,7 +61,8 @@ public class DatabaseServerConnectionInfo {
         if (getHostname() == null || getPort() == null) {
             throw new IllegalArgumentException("Illegal hostname / port  -> cannot be null");
         }
-        String link = "jdbc:mysql://"+getHostname()+":"+getPort()+"/?serverTimezone=Europe/Warsaw";
+        String link = "jdbc:oracle:thin:@"+getHostname()+":"+getPort()+":XE";
+        System.out.println(link);
         return link;
     }
 

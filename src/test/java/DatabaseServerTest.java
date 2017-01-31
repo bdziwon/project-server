@@ -32,7 +32,16 @@ public class DatabaseServerTest {
 
     @Test
     public void connectWithWrongLoginOrPasswordShouldThrowSQLException() {
-        DatabaseServerConnectionInfo connectionInfo = new DatabaseServerConnectionInfo("localhost","3306","aa","bb");
+        DatabaseServerConnectionInfo connectionInfo =
+                new DatabaseServerConnectionInfo
+                        ("localhost","1521","LORKcANO","oraclec");
+
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         DatabaseServer db = DatabaseServer.getInstance();
         final Connection[] connection = new Connection[1];
         ThrowableAssert.ThrowingCallable connectAction = () -> connection[0] = db.connect(connectionInfo);
@@ -41,12 +50,11 @@ public class DatabaseServerTest {
     }
 
     @Test
-    public void databaseBasicOperationsTest() {
-        //connect
+    public void dropTables() {
         DatabaseServerConnectionInfo connectionInfo =
-                new DatabaseServerConnectionInfo("localhost", "3306");
-        connectionInfo.setUsername("root");
-        connectionInfo.setPassword("");
+                new DatabaseServerConnectionInfo("localhost", "1521");
+        connectionInfo.setUsername("LORKANO");
+        connectionInfo.setPassword("oracle");
 
         DatabaseServer db = DatabaseServer.getInstance();
         try {
@@ -56,8 +64,23 @@ public class DatabaseServerTest {
             e.printStackTrace();
         }
 
-        //Tworzenie i wybór bazy database
-        db.createDatabaseIfDoesNotExists();
+    }
+
+    @Test
+    public void databaseBasicOperationsTest() {
+        //connect
+        DatabaseServerConnectionInfo connectionInfo =
+                new DatabaseServerConnectionInfo("localhost", "1521");
+        connectionInfo.setUsername("LORKANO");
+        connectionInfo.setPassword("oracle");
+
+        DatabaseServer db = DatabaseServer.getInstance();
+        try {
+            Connection connection = db.connect(connectionInfo);
+            assertThat(connection.createStatement()).isNotNull();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         //create tables
         db.createTablesIfDoesNotExists();
@@ -91,7 +114,6 @@ public class DatabaseServerTest {
         }
 
         ArrayList<User> users = db.getUsersList();
-
         assertThat(users.size()).isEqualTo(2);
 
         int userid = user.getId();
@@ -126,6 +148,8 @@ public class DatabaseServerTest {
             changes = db.delete(user2);
             assertThat(changes).isEqualTo(1);
         }
+        db.dropTables();
+
         //po teście baza powinna być pusta
 
     }

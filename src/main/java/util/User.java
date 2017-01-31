@@ -55,7 +55,7 @@ public class User implements DatabaseSqlInterface, Serializable {
     @Override
     public String makeUpdateSql() {
         String sql =
-                "UPDATE user " +
+                "UPDATE user_t " +
                         "SET " +
                         "name = '" + getName() + "', " +
                         "surname = '" + getSurname() + "', " +
@@ -67,14 +67,14 @@ public class User implements DatabaseSqlInterface, Serializable {
     @Override
     public String makeDeleteSql() {
         String sql =
-                "DELETE FROM user WHERE id=" + getId();
+                "DELETE FROM user_t WHERE id=" + getId();
         return sql;
     }
 
     @Override
     public String makeInsertSql() {
         String sql =
-                "INSERT INTO user(name,surname,jobTitle) " +
+                "INSERT INTO user_t(name,surname,jobTitle) " +
                         "VALUES ('" + getName() + "','" + getSurname() + "','" + getJobTitle() + "')";
 
         return sql;
@@ -83,7 +83,7 @@ public class User implements DatabaseSqlInterface, Serializable {
     @Override
     public String makeSelectSql() {
         String sql =
-                "SELECT * FROM user WHERE id = " + getId();
+                "SELECT * FROM user_t WHERE id = " + getId();
         return sql;
     }
 
