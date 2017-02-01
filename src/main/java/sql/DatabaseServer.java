@@ -744,6 +744,7 @@ public class DatabaseServer {
                 e.printStackTrace();
             }
             return list;
+
         } else {
             String sql = "SELECT * FROM project " +
                     "WHERE id IN (SELECT id_project " +

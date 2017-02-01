@@ -48,6 +48,10 @@ public class InputHandler {
                 dataPackage = update(dataPackage);
                 return dataPackage;
 
+            case "delete" :
+                delete(dataPackage);
+                return dataPackage;
+
             case "list projects" :
                 dataPackage = getProjectList(dataPackage);
                 return dataPackage;
@@ -125,12 +129,15 @@ public class InputHandler {
     /**
      * Usuwanie z bazy po id w obiekcie
      * Jeśli usuwamy projekt usunie też jego błędy, użytkownicy zostają
-     * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
      * @return ilość zmian w bazie, jak zero to błąd
      */
-    private Object delete(Object object) {
+    private Object delete(DataPackage dataPackage) {
         DatabaseServer db = DatabaseServer.getInstance();
-        return db.delete(object);
+        int changes = db.delete(dataPackage.getObject());
+        if (changes > 0) {
+            dataPackage.setDetails("deleted");
+        }
+        return dataPackage;
     }
 
     /**

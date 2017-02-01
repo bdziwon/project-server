@@ -60,6 +60,7 @@ public class Connection {
                         System.out.println("Nieobsługiwane zapytanie dla serwera");
                         try {
                             output.writeObject(new DataPackage("error","error"));
+                            continue;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
