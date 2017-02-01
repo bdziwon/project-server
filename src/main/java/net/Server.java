@@ -150,6 +150,7 @@ public class Server {
                         LOG.error("Error: cant add connection into list");
                         continue;
                     }
+                    LOG.info("Ilość aktywnych połączeń: "+connections.size());
                 }
 
                 //Kończenie serwera po zakończeniu pętli

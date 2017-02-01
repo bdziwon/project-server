@@ -415,7 +415,6 @@ public class DatabaseServer {
     }
 
     public boolean insertCredentials(User user, Credentials credentials) throws IllegalArgumentException {
-        DatabaseServer db   = DatabaseServer.getInstance();
         String sql          = "";
         String login        = credentials.getLogin();
         String password     = credentials.getPassword();
@@ -624,6 +623,10 @@ public class DatabaseServer {
             ArrayList<Issue> issues = project.getIssues();
             ArrayList<User> users = project.getUsers();
             ResultSet results = null;
+            System.out.println("Tworzę nowy projekt"+System.lineSeparator()+
+            "Liczba User: "+users.size()+System.lineSeparator()+
+            "Liczba Issue: "+issues.size()+System.lineSeparator()
+            );
 
             //sprawdź czy issue istnieje
             //jeśli nie, stwórz issue i stwórz project_issue
@@ -651,13 +654,16 @@ public class DatabaseServer {
                     e.printStackTrace();
                 }
             }
-
             for (User user : users) {
                 if (user.getId() == -1) {
                     System.out.println("update omija usera z id -1");
                     continue;
                 }
-                sql = "SELECT * FROM project_user WHERE id_user = " + user.getId();
+                sql = "SELECT * FROM project_user WHERE id_user = " + user.getId() +
+                " AND id_project = "+project.getId();
+
+                System.out.println(sql);
+
                 try {
                     results = db.connection
                             .createStatement().executeQuery(sql);
@@ -666,7 +672,7 @@ public class DatabaseServer {
                 }
                 try {
                     if (!results.next()) {
-                        sql = "INSERT INTO project_USER(id_project, id_user) " +
+                        sql = "INSERT INTO project_user(id_project, id_user) " +
                                 "VALUES (" + project.getId() + ", " + user.getId() + ")";
                         changes = changes + db.connection
                                 .createStatement().executeUpdate(sql);
@@ -710,31 +716,58 @@ public class DatabaseServer {
         return list;
     }
 
-    public ArrayList<Project> getProjectList() {
+
+    public ArrayList<Project> getProjectList(User currentUser) {
 
         ArrayList<Project> list = new ArrayList<>();
         ResultSet results = null;
         Project project = new Project();
 
-        String sql = "SELECT id,title,description FROM project";
+        if (currentUser.getJobTitle().equals("ADMINISTRATOR")) {
 
-        try {
-            results = connection.createStatement().executeQuery(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            String sql = "SELECT id,title,description FROM project";
 
-        try {
-
-            while (results.next()) {
-                project = project.resultSetToObject(results);
-                list.add(project);
+            try {
+                results = connection.createStatement().executeQuery(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return list;
+
+            try {
+
+                while (results.next()) {
+                    project = project.resultSetToObject(results);
+                    list.add(project);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return list;
+        } else {
+            String sql = "SELECT * FROM project " +
+                    "WHERE id IN (SELECT id_project " +
+                    "FROM project_user " +
+                    "WHERE id_user = "+currentUser.getId()+")";
+
+            System.out.println(sql);
+
+            try {
+                results = connection.createStatement().executeQuery(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+
+                while (results.next()) {
+                    project = project.resultSetToObject(results);
+                    list.add(project);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return list;
+        }
     }
 
 

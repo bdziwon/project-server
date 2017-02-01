@@ -116,4 +116,9 @@ public class Project implements DatabaseSqlInterface, Serializable {
     public ArrayList<User> getUsers() {
         return users;
     }
+
+    @Override
+    public String toString() {
+        return title+"("+id+")";
+    }
 }

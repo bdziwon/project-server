@@ -48,10 +48,23 @@ public class InputHandler {
                 dataPackage = update(dataPackage);
                 return dataPackage;
 
+            case "list projects" :
+                dataPackage = getProjectList(dataPackage);
+                return dataPackage;
+
             default:
                 return null;
         }
 
+    }
+
+    private DataPackage getProjectList(DataPackage dataPackage) {
+        DatabaseServer      db          = DatabaseServer.getInstance();
+        ArrayList<Project>  projects    = db.getProjectList(connection.getLoggedUser());
+
+        dataPackage.setDetails("projects");
+        dataPackage.setObject(projects);
+        return  dataPackage;
     }
 
     private DataPackage selectUserByLogin(DataPackage dataPackage) {
@@ -63,7 +76,7 @@ public class InputHandler {
     }
 
     private DataPackage logout(DataPackage dataPackage) {
-        this.getConnection().setLoggedUserId(-1);
+        this.getConnection().setLoggedUser(new User());
         dataPackage.setDetails("skip sending");
         return dataPackage;
     }
@@ -74,6 +87,7 @@ public class InputHandler {
         this.getConnection().setActive(false);
         Server.removeConnection(this.getConnection());
         dataPackage.setDetails("skip sending");
+        System.out.println("Ilość aktywnych połączeń: "+Server.getConnections().size());
         return  dataPackage;
     }
 
@@ -153,7 +167,7 @@ public class InputHandler {
 
         while (i.hasNext()) {
             Connection c = (Connection) i.next();
-            if (c.getLoggedUserId() == user.getId()) {
+            if (c.getLoggedUser().getId() == user.getId()) {
                 logged = true;
                 break;
             }
@@ -169,7 +183,7 @@ public class InputHandler {
 
         //jeśli nie jest jeszcze zalogowany
         this.getConnection().setLogged(true);
-        this.getConnection().setLoggedUserId(user.getId());
+        this.getConnection().setLoggedUser(user);
 
         dataPackage.setDetails("logged");
         dataPackage.setObject(user);

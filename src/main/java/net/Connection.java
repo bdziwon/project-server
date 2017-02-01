@@ -14,9 +14,6 @@ public class Connection {
     /** Status zalogowania, ustawiamy na true jeśli jest zalogowany, oraz ustawiamy usera **/
     private boolean logged   = false;
 
-    /** ID zalogowanego użytkownika z bazy **/
-    private int loggedUserId = -1;
-
     /** Ustawiamy na false aby zakończyć połączenie **/
     private boolean active = true;
 
@@ -24,6 +21,7 @@ public class Connection {
     private Socket socket;
 
     private InputHandler inputHandler = new InputHandler(this);
+    private User loggedUser = new User();
 
     public Connection(Socket socket) {
 
@@ -58,16 +56,21 @@ public class Connection {
                     }
 
                     dataPackage = inputHandler.handle(dataPackage);
-
+                    if (dataPackage == null) {
+                        System.out.println("Nieobsługiwane zapytanie dla serwera");
+                        try {
+                            output.writeObject(new DataPackage("error","error"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     if (dataPackage.getDetails().equals("skip sending")) {
                         //nie wysyła, na takie nie czekamy w kliencie
                         //np logout, disconnect
                         continue;
                     }
 
-                    if (dataPackage == null) {
-                        System.out.println("Nieobsługiwane zapytanie dla serwera");
-                    }
+
 
                     try {
                         output.writeObject(dataPackage);
@@ -97,19 +100,19 @@ public class Connection {
         this.socket = socket;
     }
 
-    public int getLoggedUserId() {
-        return loggedUserId;
-    }
-
-    public void setLoggedUserId(int loggedUserId) {
-        this.loggedUserId = loggedUserId;
-    }
-
     public boolean isActive() {
         return active;
     }
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void setLoggedUser(User loggedUser) {
+        this.loggedUser = loggedUser;
+    }
+
+    public User getLoggedUser() {
+        return loggedUser;
     }
 }
