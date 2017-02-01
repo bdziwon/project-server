@@ -44,16 +44,5 @@ public class ZipSender {
 		else fileOutputStream.close();		
 	}
 	
-	
-
-	  public static void main(String[] args) throws Exception {
-	  
-		File file = new File("C:/Documents and Settings/janusz.JAN/workspace/servers.zip");
-		File file2 = new File("C:/Documents and Settings/janusz.JAN/workspace/FileHandler/src/FileRead22222.zip");
-		file2.createNewFile();
-		ZipSender.copyFile(file, file2);
-		
-
-	  }
 
 }
