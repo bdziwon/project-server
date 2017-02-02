@@ -133,6 +133,13 @@ public class InputHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        try {
+            FileUnzipper.unzip(file,"");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         dataPackage.setDetails("saved");
         return dataPackage;
     }

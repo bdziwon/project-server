@@ -31,7 +31,7 @@ public class FileUnzipper {
 
 	            	if (!parent.exists()) {
 	            				parent.mkdirs();
-	            				}
+					}
 
 	            	try (BufferedOutputStream bufferedOutputStream = 
 	            			new BufferedOutputStream(new FileOutputStream(file))) {

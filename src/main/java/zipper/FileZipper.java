@@ -32,7 +32,7 @@ public class FileZipper {
 		}
 		else {
 
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[10240];
 			int length;
 			FileInputStream fileInputStream = new FileInputStream(srcFile);
 			zipOutputStream.putNextEntry(new ZipEntry(path + "/" + folder.getName()));
@@ -46,9 +46,7 @@ public class FileZipper {
 	static private void addFolderToZip(String path
 			, String srcFolder, ZipOutputStream zip) throws IOException{
 		File folder = new File(srcFolder);
-		if (folder == null) {
-			folder.mkdir();
-		}
+		folder.mkdir();
 		for (String fileName : folder.list()) {
 
 			if (path.equals("")) {
