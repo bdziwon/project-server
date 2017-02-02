@@ -3,7 +3,13 @@ package util;
 import net.Connection;
 import net.Server;
 import sql.DatabaseServer;
+import zipper.FileZipper;
+import zipper.ZipSender;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -60,10 +66,37 @@ public class InputHandler {
                 dataPackage = getProjectList(dataPackage);
                 return dataPackage;
 
+            case "save files" :
+                dataPackage = saveFiles(dataPackage);
+                return  dataPackage;
+
             default:
                 return null;
         }
 
+    }
+
+    private DataPackage saveFiles(DataPackage dataPackage) {
+        ArrayList<Object> objects = (ArrayList<Object>) dataPackage.getObject();
+        Project project = (Project) objects.get(0);
+        String folderName = Integer.toString(project.getId());
+        byte[] bytes = (byte[]) objects.get(1);
+        int count = (int) objects.get(2);
+        System.out.println(bytes);
+        File file = new File(folderName+".zip");
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(folderName+".zip");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            ZipSender.WriteBuff(fileOutputStream,bytes,count);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        dataPackage.setDetails("saved");
+        return dataPackage;
     }
 
     private DataPackage getProjectList(DataPackage dataPackage) {

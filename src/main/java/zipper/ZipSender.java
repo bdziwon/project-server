@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class ZipSender {
 
-	public final static int BUF_SIZE = 1024;
+	public final static int BUF_SIZE = 10240;
 	public static int ind=1;
 	
 
