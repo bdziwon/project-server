@@ -11,10 +11,10 @@ import java.util.zip.ZipInputStream;
 
 public class FileUnzipper {
 
-
+	
 	public static void unzip(File source, String out) throws IOException {
-
-		try (ZipInputStream zipInputStream =
+	    
+		try (ZipInputStream zipInputStream = 
 				new ZipInputStream(new FileInputStream(source))) {
 
 			ZipEntry entry = zipInputStream.getNextEntry();
@@ -25,7 +25,7 @@ public class FileUnzipper {
 
 	            if (entry.isDirectory()) {
 	            		file.mkdirs();
-	            		}
+	            		} 
 	            else {
 	            	File parent = file.getParentFile();
 
@@ -33,10 +33,13 @@ public class FileUnzipper {
 	            				parent.mkdirs();
 	            				}
 
-	            	try (BufferedOutputStream bufferedOutputStream =
+	            	try (BufferedOutputStream bufferedOutputStream = 
 	            			new BufferedOutputStream(new FileOutputStream(file))) {
-
-	            		byte[] buffer = new byte[Math.toIntExact(entry.getSize())];
+	            		int test=Math.toIntExact(entry.getSize());
+	            		byte[] buffer = new byte[1];
+	            		if(test>-1){
+	            			buffer = new byte[test];
+	            		} 
 
 	            		int location;
 
@@ -44,16 +47,16 @@ public class FileUnzipper {
 	            			bufferedOutputStream.write(buffer, 0, location);
 	                    	}
 	            	}
-
+	            	
 	            	}
 	            entry = zipInputStream.getNextEntry();
 	        	}
 	    }
 	}
-
+	
 	public static void main(String[] args) throws IOException {
-
-		File file= new File("C:/Documents and Settings/janusz.JAN/workspace/FileHandler/.settings.zip");
-		unzip(file,"C:/Documents and Settings/janusz.JAN/workspace/FileHandler/bin/");
+		
+		File file= new File("C:/Documents and Settings/janusz.JAN/workspace/FileHandler/21.zip");
+		unzip(file,"C:/Documents and Settings/janusz.JAN/workspace/FileHandler/");
 	}
 }
