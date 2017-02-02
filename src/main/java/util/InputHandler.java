@@ -2,16 +2,14 @@ package util;
 
 import net.Connection;
 import net.Server;
+import org.zeroturnaround.zip.ZipUtil;
+import org.zeroturnaround.zip.commons.FileUtils;
 import sql.DatabaseServer;
-import zipper.FileUnzipper;
-import zipper.FileZipper;
-import zipper.ZipHandler;
 import zipper.ZipSender;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.FileHandler;
 
 
 public class InputHandler {
@@ -45,9 +43,7 @@ public class InputHandler {
                 return dataPackage;
 
             case "insert" :
-                Object object = dataPackage.getObject();
-                object = insert(object);
-                dataPackage.setObject(object);
+                dataPackage = insert(dataPackage);
                 return dataPackage;
 
             case "update" :
@@ -82,14 +78,19 @@ public class InputHandler {
 
     private DataPackage getFiles(DataPackage dataPackage) {
         Project selectedProject = (Project) dataPackage.getObject();
+        String  folderName  = Integer.toString(selectedProject.getId());
+        File    zip         = new File(folderName+".zip");
+        File    folder      = new File(folderName);
 
-        String folderName = Integer.toString(selectedProject.getId());
-        try {
-            FileZipper.zipFolder(folderName, folderName+".zip");
-        } catch (IOException e) {
-            e.printStackTrace();
+        folder.mkdir();
+        try  {
+            ZipUtil.pack(folder,zip);
+        } catch (Exception e) {
+            if (!e.toString().contains("any files!")) {
+                e.printStackTrace();
+            }
         }
-        File zip = new File(folderName+".zip");
+
         FileInputStream fileInputStream = null;
 
         try {
@@ -115,14 +116,15 @@ public class InputHandler {
     }
 
     private DataPackage saveFiles(DataPackage dataPackage) {
-        ArrayList<Object> objects = (ArrayList<Object>) dataPackage.getObject();
-        Project project = (Project) objects.get(0);
-        String folderName = Integer.toString(project.getId());
-        byte[] bytes = (byte[]) objects.get(1);
-        int count = (int) objects.get(2);
-        System.out.println(bytes);
+        ArrayList<Object>   objects     = (ArrayList<Object>) dataPackage.getObject();
+        Project             project     = (Project) objects.get(0);
+        String              folderName  = Integer.toString(project.getId());
+        byte[]              bytes       = (byte[]) objects.get(1);
+        int                 count       = (int) objects.get(2);
+
         File file = new File(folderName+".zip");
         FileOutputStream fileOutputStream = null;
+
         try {
             fileOutputStream = new FileOutputStream(folderName+".zip");
         } catch (FileNotFoundException e) {
@@ -133,13 +135,14 @@ public class InputHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        File folder = new File(folderName);
         try {
-            FileUnzipper.unzip(file,"");
+            FileUtils.deleteDirectory(folder);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        folder.mkdir();
+        ZipUtil.unpack(file, folder);
         dataPackage.setDetails("saved");
         return dataPackage;
     }
@@ -180,15 +183,13 @@ public class InputHandler {
 
     /**
      * to stworzy dowolny projekt, błąd lub użytkownika, wystarczy żeby rozróżnić że to insert
-     * @param object obiekt klasy {@link Issue} {@link Project} {@link User}
-     * @return zwraca obiekt z id z bazy, nie dodaje issue i user do projektu jeśli są na liście,
      * to robi dopiero update dla projektu
      */
-    private Object insert(Object object) {
+    private DataPackage insert(DataPackage dataPackage) {
         DatabaseServer db = DatabaseServer.getInstance();
-        object = db.insert(object);
-
-        return object;
+        Object object = db.insert(dataPackage.getObject());
+        dataPackage.setObject(object);
+        return dataPackage;
     }
 
         /**
@@ -297,7 +298,7 @@ public class InputHandler {
         if (db.select(credentials, true) == null) {
             System.out.println("wstawiam");
             User user = (User) params.get(1);
-            user = (User) insert(user);
+            user = (User) db.insert(user);
             if (!db.insertCredentials(user, credentials)) {
                 dataPackage.setDetails("login/password error");
                 return dataPackage;

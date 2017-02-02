@@ -3,9 +3,12 @@ package sql;
 import com.mysql.cj.jdbc.io.ResultSetFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.zeroturnaround.zip.commons.FileUtils;
 import util.*;
 import util.interfaces.DatabaseSqlInterface;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.*;
 import java.util.ArrayList;
@@ -370,6 +373,18 @@ public class DatabaseServer {
         try {
             int changes = connection.createStatement().executeUpdate(sql);
             LOG.info("Usuniętych pozycji: " + changes);
+            if (object.getClass() == Project.class) {
+                Project project = (Project) object;
+                File folder = new File(Integer.toString(project.getId()));
+                File file = new File(Integer.toString(project.getId())+".zip");
+
+                try {
+                    FileUtils.deleteDirectory(folder);
+                    FileUtils.deleteQuietly(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             return changes;
         } catch (SQLException e) {
             e.printStackTrace();
