@@ -329,6 +329,7 @@ public class DatabaseServer {
         //Dla każdego obiektu Issue, Project, user zawsze stworzy poprawnego inserta
         DatabaseSqlInterface sqlInterface = (DatabaseSqlInterface) object;
         String sql = sqlInterface.makeInsertSql();
+        System.out.println(sql);
         try {
             PreparedStatement statement = connection.prepareStatement(sql,new String[] {"id"});
 
@@ -632,28 +633,29 @@ public class DatabaseServer {
             //jeśli nie, stwórz issue i stwórz project_issue
             //jeśli tak, tylko update issue
 
-            for (Issue issue : issues
-                    ) {
-                sql =
-                        "SELECT * FROM issue WHERE id = " + issue.getId();
+            sql = "DELETE FROM issue WHERE id_project="+project.getId();
+            System.out.println(sql);
 
-                try {
-                    results = db.connection.createStatement(
-                            ResultSet.TYPE_SCROLL_INSENSITIVE,
-                            ResultSet.CONCUR_UPDATABLE
-                    ).executeQuery(sql);
-
-                    results.last();
-                    if (results.getRow() > 0) {
-                        changes = changes + db.update(issue);
-
-                    } else {
-                        db.insert(issue);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            try {
+                changes = connection.createStatement().executeUpdate(sql);
+                System.out.println("Usunięto wierszy: "+changes);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+
+            for (Issue issue : issues) {
+                db.insert(issue);
+            }
+
+            sql = "DELETE FROM project_user WHERE id_project="+project.getId();
+            System.out.println(sql);
+            try {
+                changes = connection.createStatement().executeUpdate(sql);
+                System.out.println("Usunięto wierszy: "+changes);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
             for (User user : users) {
                 if (user.getId() == -1) {
                     System.out.println("update omija usera z id -1");
@@ -674,6 +676,7 @@ public class DatabaseServer {
                     if (!results.next()) {
                         sql = "INSERT INTO project_user(id_project, id_user) " +
                                 "VALUES (" + project.getId() + ", " + user.getId() + ")";
+                        System.out.println(sql);
                         changes = changes + db.connection
                                 .createStatement().executeUpdate(sql);
                     }

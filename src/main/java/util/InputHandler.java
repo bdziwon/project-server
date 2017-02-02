@@ -52,6 +52,10 @@ public class InputHandler {
                 delete(dataPackage);
                 return dataPackage;
 
+            case "select" :
+                select(dataPackage);
+                return dataPackage;
+
             case "list projects" :
                 dataPackage = getProjectList(dataPackage);
                 return dataPackage;
@@ -143,12 +147,16 @@ public class InputHandler {
     /**
      * Pobiera dane z bazy do obiektu
      * Jeśli to projekt, pobierze także wszystkie błędy i użytkowników do list
-     * @param object Musi zawierać id obiektu i być odpowiednią klasą
      * @return Obiekt reprezentujący dane z bazy
      */
-    private Object select(Object object) {
+    private Object select(DataPackage dataPackage) {
         DatabaseServer db = DatabaseServer.getInstance();
-        return db.select(object);
+
+        dataPackage.setObject(
+                db.select(dataPackage.getObject())
+        );
+        dataPackage.setDetails("selected");
+        return dataPackage;
     }
     //TODO: zapis projektu (plików) na serwerze, mogą być np zapisywane w folderach o nazwie..
     // jak tytuł projektu zamiast ścieżek jakichś
