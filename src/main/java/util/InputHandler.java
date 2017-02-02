@@ -3,15 +3,15 @@ package util;
 import net.Connection;
 import net.Server;
 import sql.DatabaseServer;
+import zipper.FileUnzipper;
 import zipper.FileZipper;
+import zipper.ZipHandler;
 import zipper.ZipSender;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.FileHandler;
 
 
 public class InputHandler {
@@ -70,10 +70,48 @@ public class InputHandler {
                 dataPackage = saveFiles(dataPackage);
                 return  dataPackage;
 
+            case "get files" :
+                dataPackage = getFiles(dataPackage);
+                return dataPackage;
+
             default:
                 return null;
         }
 
+    }
+
+    private DataPackage getFiles(DataPackage dataPackage) {
+        Project selectedProject = (Project) dataPackage.getObject();
+
+        String folderName = Integer.toString(selectedProject.getId());
+        try {
+            FileZipper.zipFolder(folderName, folderName+".zip");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        File zip = new File(folderName+".zip");
+        FileInputStream fileInputStream = null;
+
+        try {
+            fileInputStream = new FileInputStream(zip);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        byte[] bytes = null;
+        try {
+            bytes = ZipSender.readBuff(fileInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ArrayList<Object> objects = new ArrayList<Object>();
+
+        objects.add(selectedProject);
+        objects.add(bytes);
+        objects.add(ZipSender.ind);
+
+        dataPackage.setObject(objects);
+        dataPackage.setDetails("files");
+        return dataPackage;
     }
 
     private DataPackage saveFiles(DataPackage dataPackage) {
